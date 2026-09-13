@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>زفتك غير | ZaffatakGhair — زفتك المخصصة باسمك بإتقان هندسي</title>
+  <meta name="description" content="منصة زفتك غير — زفتك الخليجية المخصصة باسمك وبنفس طبقة صوت الفنان الأصلي، بإتقان هندسي صوتي عالي. زفات سعودية وإماراتية وكويتية فاخرة." />
+  <meta name="keywords" content="زفة, زفات خليجية, زفة مخصصة, زفة باسمك, زفة سعودية, دخلة عروس, زفة احترافية" />
+  <meta property="og:title" content="زفتك غير — زفة مخصصة باسمك بإتقان هندسي فاخر" />
+  <meta property="og:description" content="اختر زفتك وسنصوغ أسماء العروسين بنفس صوت الفنان خلال وقت قياسي" />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+
+  <style>
+    /* ── Mobile Nav Menu ── */
+    .mobile-menu {
+      position: fixed;
+      top: 80px; left: 0; right: 0;
+      background: rgba(10,15,29,0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      padding: 24px;
+      z-index: 999;
+      transform: translateY(-10px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .mobile-menu.open { transform: translateY(0); opacity: 1; visibility: visible; }
+    .mobile-menu .mobile-nav { display: flex; flex-direction: column; gap: 4px; list-style: none; }
+    .mobile-menu .mobile-nav a {
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      display: block;
+      transition: var(--transition);
+    }
+    .mobile-menu .mobile-nav a:hover { color: var(--gold); background: rgba(212,175,55,0.08); }
+
+    /* ── Features Strip ── */
+    .features-strip {
+      border-top: 1px solid rgba(212,175,55,0.12);
+      border-bottom: 1px solid rgba(212,175,55,0.12);
+      padding: 24px 0;
+      overflow: hidden;
+      background: rgba(212,175,55,0.02);
+    }
+    .features-inner {
+      display: flex;
+      gap: 60px;
+      animation: scrollMarquee 30s linear infinite;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .feature-item .fi { font-size: 1.2rem; }
+    @keyframes scrollMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── How it Works ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .step-card {
+      text-align: center;
+      padding: 32px 20px;
+    }
+    .step-num {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+      border: 2px solid rgba(212,175,55,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--gold);
+    }
+    .step-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+    .step-title {
+      font-family: 'Cairo', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .step-desc { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; }
+    .step-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 1.2rem;
+      opacity: 0.4;
+    }
+
+    @media (max-width: 768px) {
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     TOAST CONTAINER
+     ══════════════════════════════════════════════════════ -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     HEADER
+     ══════════════════════════════════════════════════════ -->
+<header class="header" id="main-header" role="banner">
+  <div class="container">
+    <nav class="nav-inner" aria-label="القائمة الرئيسية">
+
+      <!-- Logo -->
+      <a href="#" class="logo-wrap" aria-label="زفتك غير - الرئيسية">
+        <div class="logo-icon">
+          <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="crown-grad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#F0D060"/>
+                <stop offset="100%" stop-color="#A8861E"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- Crown base -->
+            <path d="M8 38 L8 42 L44 42 L44 38 Z" fill="url(#crown-grad)" rx="2" filter="url(#glow)"/>
+            <!-- Crown body -->
+            <path d="M8 38 L12 20 L20 30 L26 14 L32 30 L40 20 L44 38 Z" fill="url(#crown-grad)" filter="url(#glow)"/>
+            <!-- Crown gems -->
+            <circle cx="26" cy="14" r="3" fill="#F0D060"/>
+            <circle cx="12" cy="20" r="2" fill="#C9796A"/>
+            <circle cx="40" cy="20" r="2" fill="#C9796A"/>
+            <!-- Musical note -->
+            <circle cx="36" cy="10" r="2.5" fill="#D4AF37"/>
+            <line x1="38.5" y1="10" x2="38.5" y2="4" stroke="#D4AF37" stroke-width="1.5"/>
+            <line x1="38.5" y1="4" x2="42" y2="5" stroke="#D4AF37" stroke-width="1.5"/>
+            <circle cx="42" cy="7.5" r="2.5" fill="#D4AF37"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-main">زفتك غير</span>
+          <span class="logo-sub">ZaffatakGhair</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <ul class="nav-links" role="list">
+        <li><a href="#hero" class="active">الرئيسية</a></li>
+        <li><a href="#catalog">مكتبة الزفات</a></li>
+        <li><a href="#how-it-works">كيف تعمل؟</a></li>
+        <li><a href="#pricing">الباقات والأسعار</a></li>
+        <li><a href="#tracking">تتبع الطلب</a></li>
+      </ul>
+
+      <!-- Actions -->
+      <div class="nav-actions">
+        <button class="nav-btn-contact" onclick="showToast('تواصل معنا عبر واتساب: +966 5X XXX XXXX', 'info')" aria-label="تواصل معنا">
+          💬 تواصل معنا
+        </button>
+        <a href="admin.html" class="nav-btn-login" aria-label="دخول المدير">
+          🔐 لوحة المدير
+        </a>
+        <button class="hamburger" id="hamburger" aria-label="قائمة التنقل" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+    </nav>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="قائمة التنقل المحمولة">
+    <ul class="mobile-nav">
+      <li><a href="#hero">🏠 الرئيسية</a></li>
+      <li><a href="#catalog">🎵 مكتبة الزفات</a></li>
+      <li><a href="#how-it-works">⚡ كيف تعمل؟</a></li>
+      <li><a href="#pricing">💎 الباقات والأسعار</a></li>
+      <li><a href="#tracking">📦 تتبع الطلب</a></li>
+    </ul>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     HERO SECTION
+     ══════════════════════════════════════════════════════ -->
+<section class="hero" id="hero" aria-labelledby="hero-heading">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div id="particles" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="hero-content">
+
+      <!-- Text Side -->
+      <div class="hero-text-side">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          ✨ منصة الزفات الخليجية رقم #1 بإتقان هندسي صوتي
+        </div>
+
+        <h1 class="hero-title" id="hero-heading">
+          زفتك المخصصة
+          <span class="highlight">باسمك... بإتقان هندسي</span>
+          وهندسة صوتية فاخرة
+        </h1>
+
+        <p class="hero-subtitle">
+          اختر ألحانك المفضل وسنصوغ أسماء العروسين بنفس طبقة ونبرة صوت الفنان الأصلي خلال وقت قياسي.
+          تجربة صوتية لا تُنسى تُحكى على مر السنين.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#catalog" class="btn-primary" id="cta-browse">
+            🎵 تصفح المكتبة الصوتية
+          </a>
+          <a href="#how-it-works" class="btn-ghost" id="cta-learn">
+            ⚡ كيف تعمل؟
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat-item">
+            <span class="hero-stat-num" id="stat-orders" data-target="2400" data-suffix="+">2400+</span>
+            <span class="hero-stat-label">طلب منجز</span>
+          </div>
+          <div class="hero-stat-item" style="border-right:1px solid rgba(212,175,55,0.2);border-left:1px solid rgba(212,175,55,0.2);padding:0 24px;">
+            <span class="hero-stat-num" id="stat-tracks" data-target="80" data-suffix="+">80+</span>
+            <span class="hero-stat-label">زفة في المكتبة</span>
+          </div>
+          <div class="hero-stat-item">
+            <span class="hero-stat-num" id="stat-rating" data-target="4.9" data-suffix="⭐">4.9⭐</span>
+            <span class="hero-stat-label">تقييم العملاء</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio Comparison Card -->
+      <div class="audio-comparison-card" id="comparison-card" role="region" aria-label="مقارنة الصوت قبل وبعد">
+        <div class="comparison-title">🎧 استمع للفرق — قبل وبعد إضافة الأسماء</div>
+
+        <!-- Before -->
+        <div class="comparison-item">
+          <div class="comparison-label">
+            <span class="tag">قبل</span>
+            زفة بدون أسماء — النسخة الأصلية
+          </div>
+          <div class="comparison-row">
+            <button class="comparison-play-btn" id="play-before" aria-label="تشغيل النسخة الأصلية">▶</button>
+            <div class="mini-waveform" id="wave-before" aria-hidden="true">
+              <div class="bar" style="height:30%"></div><div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:70%"></div><div class="bar" style="height:45%"></div>
+              <div class="bar" style="height:80%"></div><div class="bar" style="height:60%"></div>
+              <div class="bar" style="height:40%"></div><div class="bar" style="height:75%"></div>
+              <div class="bar" style="height:55%"></div><div class="bar" style="height:65%"></div>
+              <div class="bar" style="height:85%"></div><div class="bar" style="height:50%"></div>
+              <div class="bar" style="height:70%"></div><div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:60%"></div><div class="bar" style="height:80%"></div>
+              <div class="bar" style="height:45%"></div><div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:55%"></div><div class="bar" style="height:35%"></div>
+              <div class="bar" style="height:65%"></div><div class="bar" style="height:50%"></div>
+              <div class="bar" style="height:75%"></div><div class="bar" style="height:60%"></div>
+              <div class="bar" style="height:40%"></div><div class="bar" style="height:80%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin:4px 0 16px;font-size:0.8rem;color:var(--text-dim);">
+          <div style="flex:1;height:1px;background:rgba(212,175,55,0.15)"></div>
+          ✨ بعد التخصيص الهندسي الصوتي
+          <div style="flex:1;height:1px;background:rgba(212,175,55,0.15)"></div>
+        </div>
+
+        <!-- After -->
+        <div class="comparison-item">
+          <div class="comparison-label">
+            <span class="tag after">بعد</span>
+            "محمد وهند" — بصوت الفنان الأصلي
+          </div>
+          <div class="comparison-row">
+            <button class="comparison-play-btn" id="play-after" style="border-color:var(--rose-gold);color:var(--rose-gold);" aria-label="تشغيل النسخة المخصصة">▶</button>
+            <div class="mini-waveform after-wave" id="wave-after" aria-hidden="true">
+              <div class="bar" style="height:45%"></div><div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:55%"></div><div class="bar" style="height:85%"></div>
+              <div class="bar" style="height:65%"></div><div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:80%"></div><div class="bar" style="height:60%"></div>
+              <div class="bar" style="height:75%"></div><div class="bar" style="height:50%"></div>
+              <div class="bar" style="height:90%"></div><div class="bar" style="height:65%"></div>
+              <div class="bar" style="height:45%"></div><div class="bar" style="height:75%"></div>
+              <div class="bar" style="height:55%"></div><div class="bar" style="height:85%"></div>
+              <div class="bar" style="height:70%"></div><div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:60%"></div><div class="bar" style="height:80%"></div>
+              <div class="bar" style="height:50%"></div><div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:65%"></div><div class="bar" style="height:45%"></div>
+              <div class="bar" style="height:85%"></div><div class="bar" style="height:55%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(212,175,55,0.15);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div style="font-size:0.78rem;color:var(--text-dim);">
+            🔒 الأصوات المعروضة للمعاينة فقط
+          </div>
+          <button class="btn-primary" style="padding:10px 20px;font-size:0.85rem;" onclick="document.querySelector('#catalog').scrollIntoView({behavior:'smooth'})">
+            احجز زفتك الآن 🎵
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     FEATURES STRIP
+     ══════════════════════════════════════════════════════ -->
+<div class="features-strip" aria-hidden="true">
+  <div class="container">
+    <div class="features-inner">
+      <div class="feature-item"><span class="fi">🎵</span> 80+ زفة خليجية أصيلة</div>
+      <div class="feature-item"><span class="fi">🤖</span> تقنية RVC / ElevenLabs AI</div>
+      <div class="feature-item"><span class="fi">⚡</span> تسليم خلال 24 ساعة</div>
+      <div class="feature-item"><span class="fi">👑</span> جودة 320kbps MP3</div>
+      <div class="feature-item"><span class="fi">💬</span> تسليم واتساب مباشر</div>
+      <div class="feature-item"><span class="fi">🔐</span> دفع آمن — مدى / Apple Pay</div>
+      <div class="feature-item"><span class="fi">🌟</span> تقييم 4.9/5 من 2400+ عميل</div>
+      <!-- duplicate for loop -->
+      <div class="feature-item"><span class="fi">🎵</span> 80+ زفة خليجية أصيلة</div>
+      <div class="feature-item"><span class="fi">🤖</span> تقنية RVC / ElevenLabs AI</div>
+      <div class="feature-item"><span class="fi">⚡</span> تسليم خلال 24 ساعة</div>
+      <div class="feature-item"><span class="fi">👑</span> جودة 320kbps MP3</div>
+      <div class="feature-item"><span class="fi">💬</span> تسليم واتساب مباشر</div>
+      <div class="feature-item"><span class="fi">🔐</span> دفع آمن — مدى / Apple Pay</div>
+      <div class="feature-item"><span class="fi">🌟</span> تقييم 4.9/5 من 2400+ عميل</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CATALOG SECTION
+     ══════════════════════════════════════════════════════ -->
+<section class="catalog-section section-padding" id="catalog" aria-labelledby="catalog-heading">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title gold-gradient-text" id="catalog-heading">مكتبة الزفات الخليجية</h2>
+      <div class="gold-divider" aria-hidden="true"></div>
+      <p class="section-subtitle">اختر من مجموعتنا الحصرية من الزفات الخليجية الأصيلة وسنخصصها باسم عروسيك</p>
+    </div>
+
+    <div class="filter-tabs" role="tablist" aria-label="فئات الزفات">
+      <button class="filter-tab active" data-category="كل" role="tab" aria-selected="true" id="tab-all">الكل</button>
+      <button class="filter-tab" data-category="saudi" role="tab" aria-selected="false" id="tab-saudi">🇸🇦 زفات سعودية</button>
+      <button class="filter-tab" data-category="uae" role="tab" aria-selected="false" id="tab-uae">🇦🇪 إماراتية وكويتية</button>
+      <button class="filter-tab" data-category="classic" role="tab" aria-selected="false" id="tab-classic">🎻 كلاسيك وفخامة</button>
+      <button class="filter-tab" data-category="duff" role="tab" aria-selected="false" id="tab-duff">🥁 دفوف بدون موسيقى</button>
+      <button class="filter-tab" data-category="poetry" role="tab" aria-selected="false" id="tab-poetry">📜 قصائد وشلات</button>
+      <button class="filter-tab" data-category="bride" role="tab" aria-selected="false" id="tab-bride">👰 دخلة العروس</button>
+      <button class="filter-tab" data-category="groom" role="tab" aria-selected="false" id="tab-groom">🤵 موكب العريس</button>
+    </div>
+
+    <!-- Tracks Grid -->
+    <div class="tracks-grid" id="tracks-grid" role="list" aria-label="قائمة الزفات المتاحة">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     HOW IT WORKS
+     ══════════════════════════════════════════════════════ -->
+<section class="section-padding" id="how-it-works" style="background:linear-gradient(to bottom,transparent,rgba(212,175,55,0.025),transparent);" aria-labelledby="how-heading">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title" id="how-heading">كيف تحصل على <span class="gold-gradient-text">زفتك المخصصة؟</span></h2>
+      <div class="gold-divider" aria-hidden="true"></div>
+      <p class="section-subtitle">عملية بسيطة من 4 خطوات وزفتك جاهزة خلال 24 ساعة</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card glass-card" role="article">
+        <div class="step-num">١</div>
+        <span class="step-icon">🎵</span>
+        <div class="step-title">اختر زفتك</div>
+        <p class="step-desc">تصفح مكتبتنا الحصرية واستمع لمعاينة الزفات المتاحة باختلاف أنواعها</p>
+      </div>
+      <div class="step-card glass-card" role="article">
+        <div class="step-num">٢</div>
+        <span class="step-icon">✍️</span>
+        <div class="step-title">أدخل التفاصيل</div>
+        <p class="step-desc">أدخل أسماء العروسين بالتشكيل وتفاصيل المناسبة وأي تعليمات خاصة</p>
+      </div>
+      <div class="step-card glass-card" role="article">
+        <div class="step-num">٣</div>
+        <span class="step-icon">💳</span>
+        <div class="step-title">ادفع بأمان</div>
+        <p class="step-desc">سدد عبر مدى أو Apple Pay أو STC Pay أو البطاقات الائتمانية بأمان تام</p>
+      </div>
+      <div class="step-card glass-card" role="article">
+        <div class="step-num">٤</div>
+        <span class="step-icon">📲</span>
+        <div class="step-title">استلم زفتك</div>
+        <p class="step-desc">يصلك ملف MP3 عالي الجودة 320kbps مباشرة على واتساب خلال 24 ساعة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     PRICING SECTION
+     ══════════════════════════════════════════════════════ -->
+<section class="pricing-section" id="pricing" aria-labelledby="pricing-heading">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title" id="pricing-heading">الباقات <span class="gold-gradient-text">والأسعار</span></h2>
+      <div class="gold-divider" aria-hidden="true"></div>
+      <p class="section-subtitle">اختر الباقة المناسبة لمناسبتك الاستثنائية</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Silver -->
+      <div class="pricing-card" role="article" aria-label="باقة الفضية">
+        <div class="pricing-name">🥈 الباقة الفضية</div>
+        <div class="pricing-price"><sup>ر.س</sup>149<sub>/زفة</sub></div>
+        <p class="pricing-desc">مثالية للمناسبات البسيطة والرومانسية</p>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> زفة واحدة مخصصة باسمك</li>
+          <li><span class="check">✓</span> جودة MP3 128kbps</li>
+          <li><span class="check">✓</span> تسليم خلال 48 ساعة</li>
+          <li><span class="check">✓</span> مراجعة واحدة مجانية</li>
+        </ul>
+        <button class="btn-ghost" onclick="document.querySelector('#catalog').scrollIntoView({behavior:'smooth'})" style="width:100%;justify-content:center;" id="pricing-silver-cta">
+          ابدأ الآن
+        </button>
+      </div>
+
+      <!-- Gold (Featured) -->
+      <div class="pricing-card featured" role="article" aria-label="الباقة الذهبية — الأكثر طلباً">
+        <div class="pricing-badge">⭐ الأكثر طلباً</div>
+        <div class="pricing-name">👑 الباقة الذهبية</div>
+        <div class="pricing-price"><sup>ر.س</sup>299<sub>/زفة</sub></div>
+        <p class="pricing-desc">تجربة صوتية فاخرة لا تُنسى</p>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> زفة واحدة مخصصة كاملة</li>
+          <li><span class="check">✓</span> جودة MP3 320kbps فاخرة</li>
+          <li><span class="check">✓</span> تسليم مضمون خلال 24 ساعة</li>
+          <li><span class="check">✓</span> مراجعتان مجانيتان</li>
+          <li><span class="check">✓</span> نسخة WAV بجودة استوديو</li>
+          <li><span class="check">✓</span> دعم واتساب مباشر</li>
+        </ul>
+        <button class="btn-primary" onclick="document.querySelector('#catalog').scrollIntoView({behavior:'smooth'})" style="width:100%;justify-content:center;" id="pricing-gold-cta">
+          احجز الآن 🎵
+        </button>
+      </div>
+
+      <!-- Platinum -->
+      <div class="pricing-card" role="article" aria-label="الباقة البلاتينية">
+        <div class="pricing-name">💎 الباقة البلاتينية</div>
+        <div class="pricing-price"><sup>ر.س</sup>499<sub>/زفة</sub></div>
+        <p class="pricing-desc">تجربة VIP ملكية شاملة</p>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> زفتان مخصصتان كاملتان</li>
+          <li><span class="check">✓</span> جودة استوديو WAV + MP3</li>
+          <li><span class="check">✓</span> تسليم فوري خلال 6 ساعات</li>
+          <li><span class="check">✓</span> مراجعات غير محدودة</li>
+          <li><span class="check">✓</span> خدمة العميل VIP 24/7</li>
+          <li><span class="check">✓</span> شهادة أصالة رقمية</li>
+        </ul>
+        <button class="btn-ghost" onclick="document.querySelector('#catalog').scrollIntoView({behavior:'smooth'})" style="width:100%;justify-content:center;" id="pricing-platinum-cta">
+          تواصل معنا
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     ORDER TRACKING
+     ══════════════════════════════════════════════════════ -->
+<section class="tracking-section" id="tracking" aria-labelledby="tracking-heading">
+  <div class="container">
+    <div class="tracking-box">
+      <div class="section-header">
+        <h2 class="section-title" id="tracking-heading">تتبع <span class="gold-gradient-text">طلبك</span></h2>
+        <div class="gold-divider" aria-hidden="true"></div>
+        <p class="section-subtitle">أدخل رقم طلبك للاطلاع على حالة تجهيز زفتك</p>
+      </div>
+
+      <div class="glass-card" style="padding:32px;">
+        <div class="tracking-input-group">
+          <input
+            type="text"
+            id="tracking-input"
+            class="tracking-input"
+            placeholder="أدخل رقم الطلب مثال: ZG-123456"
+            aria-label="رقم الطلب"
+            maxlength="12"
+            style="letter-spacing:2px;text-transform:uppercase;"
+          />
+          <button class="btn-primary" id="track-order-btn" style="padding:14px 28px;" aria-label="تتبع الطلب">
+            🔍 تتبع
+          </button>
+        </div>
+        <div id="tracking-result" role="region" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════════════════ -->
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo-wrap" style="text-decoration:none;" aria-label="زفتك غير">
+          <div class="logo-icon" style="width:44px;height:44px;">
+            <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 38 L8 42 L44 42 L44 38 Z" fill="#D4AF37"/>
+              <path d="M8 38 L12 20 L20 30 L26 14 L32 30 L40 20 L44 38 Z" fill="#D4AF37"/>
+              <circle cx="26" cy="14" r="3" fill="#F0D060"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-main" style="font-size:1.1rem;">زفتك غير</span>
+          </div>
+        </a>
+        <p>منصة الزفات الخليجية المخصصة بإتقان هندسي صوتي عالي. نصوغ أسماء عروسيك بنفس طبقة صوت الفنان الأصلي خلال وقت قياسي.</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn" aria-label="تويتر">𝕏</a>
+          <a href="#" class="social-btn" aria-label="إنستغرام">📷</a>
+          <a href="#" class="social-btn" aria-label="تيك توك">🎵</a>
+          <a href="#" class="social-btn" aria-label="واتساب">💬</a>
+          <a href="#" class="social-btn" aria-label="سناب شات">👻</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>روابط سريعة</h4>
+        <ul>
+          <li><a href="#catalog">مكتبة الزفات</a></li>
+          <li><a href="#how-it-works">كيف تعمل؟</a></li>
+          <li><a href="#pricing">الأسعار والباقات</a></li>
+          <li><a href="#tracking">تتبع الطلب</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>أنواع الزفات</h4>
+        <ul>
+          <li><a href="#catalog">زفات سعودية</a></li>
+          <li><a href="#catalog">زفات إماراتية</a></li>
+          <li><a href="#catalog">زفات كويتية</a></li>
+          <li><a href="#catalog">قصائد واستقبال</a></li>
+          <li><a href="#catalog">دخلة العروس</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>تواصل معنا</h4>
+        <ul>
+          <li><a href="tel:+966500000000">📞 +966 5X XXX XXXX</a></li>
+          <li><a href="mailto:info@zaffatak.com">✉️ info@zaffatak.com</a></li>
+          <li><a href="#">💬 واتساب المبيعات</a></li>
+          <li><a href="#">⏰ ٩ص — ١٢م يومياً</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 زفتك غير — جميع الحقوق محفوظة</span>
+      <span>
+        <a href="#" style="color:var(--text-dim);text-decoration:none;margin:0 8px;">سياسة الخصوصية</a>
+        <a href="#" style="color:var(--text-dim);text-decoration:none;margin:0 8px;">شروط الاستخدام</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════
+     BOOKING MODAL
+     ══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal" id="booking-modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title" id="modal-title">🎵 احجز زفتك المخصصة</h2>
+        <div class="modal-track-name" id="modal-track-name"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="إغلاق">✕</button>
+    </div>
+
+    <!-- Form Screen -->
+    <div id="form-screen">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="groom-name">اسم العريس <span class="req">*</span></label>
+            <input type="text" id="groom-name" class="form-input" placeholder="مثال: مُحَمَّد بالتشكيل" required aria-required="true" />
+            <div class="form-hint">💡 أضف التشكيل للنطق الصحيح</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bride-name">اسم العروس <span class="req">*</span></label>
+            <input type="text" id="bride-name" class="form-input" placeholder="مثال: هِنْد بالتشكيل" required aria-required="true" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="family-title">ألقاب العوائل / القبيلة <span style="color:var(--text-dim);font-weight:400;">(اختياري)</span></label>
+          <input type="text" id="family-title" class="form-input" placeholder="مثال: آل العتيبي — آل الشمري" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="event-date">تاريخ المناسبة <span class="req">*</span></label>
+            <input type="date" id="event-date" class="form-input" required aria-required="true" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="whatsapp">رقم الواتساب <span class="req">*</span></label>
+            <input type="tel" id="whatsapp" class="form-input" placeholder="+966 5X XXX XXXX" required aria-required="true" dir="ltr" style="text-align:left;" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">البريد الإلكتروني</label>
+          <input type="email" id="email" class="form-input" placeholder="email@example.com" dir="ltr" style="text-align:left;" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="special-notes">ملاحظات هندسية خاصة</label>
+          <textarea id="special-notes" class="form-textarea" placeholder="مثال: أريد النطق بنبرة أبطأ قليلاً في اسم العريس، ومع إطالة في الاسم الأخير..."></textarea>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="price-summary" aria-label="ملخص السعر">
+          <div class="price-row">
+            <span>سعر الزفة الأساسي</span>
+            <span id="base-price">—</span>
+          </div>
+          <div class="price-row">
+            <span>⚙️ رسوم خدمة الهندسة الصوتية</span>
+            <span id="ai-price">50 ر.س</span>
+          </div>
+          <div class="price-row">
+            <span>الضريبة (15%)</span>
+            <span id="tax-price">شاملة</span>
+          </div>
+          <div class="price-row total">
+            <span>💎 الإجمالي</span>
+            <span id="total-price" style="font-size:1.2rem;">—</span>
+          </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="payment-methods">
+          <div class="payment-label">اختر طريقة الدفع</div>
+          <div class="payment-options" role="radiogroup" aria-label="طرق الدفع">
+            <div class="payment-option selected" data-method="mada" role="radio" aria-checked="true" tabindex="0" id="pay-mada">
+              <span class="pm-icon">💳</span>
+              مدى
+            </div>
+            <div class="payment-option" data-method="apple" role="radio" aria-checked="false" tabindex="0" id="pay-apple">
+              <span class="pm-icon"></span>
+              Apple Pay
+            </div>
+            <div class="payment-option" data-method="stc" role="radio" aria-checked="false" tabindex="0" id="pay-stc">
+              <span class="pm-icon">📱</span>
+              STC Pay
+            </div>
+            <div class="payment-option" data-method="card" role="radio" aria-checked="false" tabindex="0" id="pay-card">
+              <span class="pm-icon">🏦</span>
+              بطاقة ائتمانية
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-submit" id="submit-order" aria-label="تأكيد وإتمام الدفع">
+          🔐 تأكيد وإتمام الدفع
+        </button>
+      </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="success-screen" role="status" aria-live="polite">
+      <div class="success-icon" aria-hidden="true">✨</div>
+      <h3 class="success-title">تم استلام طلبك بنجاح! 🎉</h3>
+      <p style="color:var(--text-muted);font-size:0.95rem;line-height:1.8;">
+        سيتواصل معك فريقنا خلال 24 ساعة عبر الواتساب لإرسال زفتك المخصصة.<br/>
+        رقم طلبك:
+      </p>
+      <div class="success-order-id" id="order-id-display" aria-label="رقم الطلب">—</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;">
+        <a href="#" id="wa-link" class="btn-primary" target="_blank" rel="noopener">
+          💬 تتبع عبر واتساب
+        </a>
+        <button class="btn-ghost" onclick="closeBookingModal()" id="close-success-btn">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     STICKY AUDIO PLAYER
+     ══════════════════════════════════════════════════════ -->
+<div class="sticky-player" id="sticky-player" role="region" aria-label="مشغل الصوت">
+  <div class="player-inner">
+    <!-- Track Info -->
+    <div class="player-track-info">
+      <div class="player-thumb-placeholder" aria-hidden="true">🎵</div>
+      <div>
+        <div class="player-track-name" id="player-track-name">جاري التحميل...</div>
+        <div class="player-track-artist" id="player-track-artist">زفتك غير</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="player-controls">
+      <div class="player-buttons">
+        <button class="player-btn" id="player-prev-btn" aria-label="السابق">⏮</button>
+        <button class="player-btn play-pause" id="player-play-btn" aria-label="تشغيل/إيقاف">▶</button>
+        <button class="player-btn" id="player-next-btn" aria-label="التالي">⏭</button>
+      </div>
+      <div class="player-progress">
+        <span class="progress-time" id="progress-current">0:00</span>
+        <div class="progress-bar-wrap" id="progress-bar-wrap" role="slider" aria-label="شريط التقدم" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bg">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="waveform-canvas-wrap">
+            <canvas id="waveform-canvas" aria-hidden="true"></canvas>
+          </div>
+        </div>
+        <span class="progress-time end" id="progress-total">0:00</span>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="player-right">
+      <div class="volume-wrap">
+        <span class="volume-icon" id="volume-icon" aria-label="الصوت">🔊</span>
+        <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="75" aria-label="مستوى الصوت" />
+      </div>
+      <button class="player-close-btn" id="player-close" aria-label="إغلاق المشغل">✕</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
