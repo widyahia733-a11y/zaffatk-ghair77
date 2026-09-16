@@ -1760,30 +1760,77 @@ a:focus:not(:focus-visible) {
 
 @media (max-width: 1024px) {
   .hero-content { grid-template-columns: 1fr; }
-  .audio-comparison-card { max-width: 480px; }
+  .audio-comparison-card { max-width: 520px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-  .player-inner { grid-template-columns: 1fr; }
-  .player-track-info, .player-right { display: none; }
+  .player-inner { grid-template-columns: 220px 1fr 140px; gap: 16px; }
 }
 
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .hamburger { display: flex; }
-  .hero-title { font-size: 2rem; }
+  .hero-title { font-size: 1.85rem; line-height: 1.35; }
   .tracks-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .payment-options { grid-template-columns: repeat(2, 1fr); }
-  .modal-body { padding: 20px; }
-  .modal-footer { padding: 0 20px 20px; flex-direction: column; }
+  .modal-body { padding: 18px; }
+  .modal-footer { padding: 0 18px 18px; flex-direction: column; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 360px; }
   .footer-grid { grid-template-columns: 1fr; gap: 24px; }
-  .filter-tabs { gap: 8px; }
-  .filter-tab { font-size: 0.82rem; padding: 8px 16px; }
+  .filter-tabs { gap: 8px; justify-content: flex-start; overflow-x: auto; padding-bottom: 6px; }
+  .filter-tab { font-size: 0.82rem; padding: 8px 16px; white-space: nowrap; flex-shrink: 0; }
+
+  /* Mobile Sticky Player Layout */
+  .sticky-player {
+    padding: 8px 14px 12px;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.7);
+  }
+  .player-inner {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .player-track-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .player-thumb-placeholder {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+  .player-track-name {
+    font-size: 0.85rem;
+    max-width: 220px;
+  }
+  .player-track-artist {
+    font-size: 0.7rem;
+  }
+  .player-right {
+    display: none;
+  }
+  .player-buttons {
+    gap: 14px;
+  }
+  .player-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+  .player-btn.play-pause {
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
+  .progress-time {
+    font-size: 0.68rem;
+    width: 30px;
+  }
 }
 
 @media (max-width: 480px) {
-  .hero-cta { flex-direction: column; }
-  .hero-stats { gap: 20px; }
+  .hero-cta { flex-direction: column; gap: 12px; }
+  .hero-stats { gap: 16px; }
   .tracking-input-group { flex-direction: column; }
-  .audio-comparison-card { padding: 20px; }
+  .audio-comparison-card { padding: 16px; }
+  .track-mini-waveform { max-width: 140px; }
 }
