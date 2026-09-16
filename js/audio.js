@@ -8,8 +8,8 @@
 'use strict';
 
 const AudioEngine = (() => {
-  // معرف الفيديو البديل الافتراضي عالي الاستقرار والموثوقية
-  const DEFAULT_FALLBACK_ID = 'sK2WlF32Sxo';
+  // معرف الفيديو البديل الافتراضي عالي الاستقرار والموثوقية (بلقيس - مبروك)
+  const DEFAULT_FALLBACK_ID = 'Rh9M8EBs6bw';
 
   let player = null;
   let isReady = false;
