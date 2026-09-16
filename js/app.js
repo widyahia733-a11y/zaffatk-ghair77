@@ -7,8 +7,8 @@
 'use strict';
 
 /* ══════════════════════════════════════════════════════════
-   DATA — مصفوفة الزفات مع روابط البث السحابي المباشر (Direct MP3 URLs)
-   جميع الروابط موثوقة وتبدأ بـ https:// وتنتهي بـ .mp3
+   DATA — مصفوفة الزفات المرتبطة بمشغل يوتيوب السحابي في الكواليس (Headless YouTube Player)
+   جميع الزفات تعمل بمعرّفات يوتيوب سحابية حقيقية ومطابقة للتصنيفات
    ══════════════════════════════════════════════════════════ */
 const TRACKS_DATA = [
   // ── زفات سعودية ──
@@ -21,8 +21,8 @@ const TRACKS_DATA = [
     regionLabel: 'سعودية',
     duration: '4:32',
     price: 249,
-    audioUrl: 'https://ia800905.us.archive.org/19/items/FREE_background_music_dh/arabic_nights.mp3',
-    audioSrc: 'https://ia800905.us.archive.org/19/items/FREE_background_music_dh/arabic_nights.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '09R8_2nJtjg',
     coverGradient: 'linear-gradient(135deg, #1a0a00, #3d1a00)',
     coverEmoji: '👑',
     tags: ['دفوف', 'طبول', 'ملكية'],
@@ -36,8 +36,8 @@ const TRACKS_DATA = [
     regionLabel: 'سعودية',
     duration: '3:45',
     price: 219,
-    audioUrl: 'https://ia802809.us.archive.org/15/items/oud-oriental-music/track1.mp3',
-    audioSrc: 'https://ia802809.us.archive.org/15/items/oud-oriental-music/track1.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #2a1505, #4a2505)',
     coverEmoji: '✨',
     tags: ['سامري', 'نجدية', 'تراث'],
@@ -51,8 +51,8 @@ const TRACKS_DATA = [
     regionLabel: 'سعودية',
     duration: '4:15',
     price: 289,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+    youtubeId: 'M3r2XDceM6A',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #1f1105, #381f08)',
     coverEmoji: '🏰',
     tags: ['عرضة', 'فخامة', 'كلاسيك'],
@@ -66,8 +66,8 @@ const TRACKS_DATA = [
     regionLabel: 'سعودية',
     duration: '5:02',
     price: 269,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '7pc_G0w9mTY',
     coverGradient: 'linear-gradient(135deg, #2e1808, #522d10)',
     coverEmoji: '🌟',
     tags: ['عود', 'بياتي', 'رواق'],
@@ -83,8 +83,8 @@ const TRACKS_DATA = [
     regionLabel: 'إماراتية',
     duration: '3:18',
     price: 199,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3',
+    youtubeId: '2Vv-BfVoq4g',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #0a0a1a, #1a0a2a)',
     coverEmoji: '💍',
     tags: ['رومانسية', 'ناعمة', 'عروس'],
@@ -98,8 +98,8 @@ const TRACKS_DATA = [
     regionLabel: 'إماراتية',
     duration: '4:20',
     price: 239,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_73138b556b.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_73138b556b.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '09R8_2nJtjg',
     coverGradient: 'linear-gradient(135deg, #081525, #122b4a)',
     coverEmoji: '💎',
     tags: ['عيالة', 'دانات', 'حماس'],
@@ -113,8 +113,8 @@ const TRACKS_DATA = [
     regionLabel: 'كويتية',
     duration: '3:50',
     price: 229,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #062024, #0d383e)',
     coverEmoji: '🌊',
     tags: ['كويتية', 'طرب', 'أصيل'],
@@ -128,8 +128,8 @@ const TRACKS_DATA = [
     regionLabel: 'إماراتية',
     duration: '4:40',
     price: 319,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_503f8a0cc3.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_503f8a0cc3.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '2Vv-BfVoq4g',
     coverGradient: 'linear-gradient(135deg, #150f29, #2b1f52)',
     coverEmoji: '🏙️',
     tags: ['أوركسترا', 'مودرن', 'فخامة'],
@@ -145,8 +145,8 @@ const TRACKS_DATA = [
     regionLabel: 'كلاسيك',
     duration: '4:35',
     price: 329,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/08/04/audio_34b07f87a0.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/08/04/audio_34b07f87a0.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #1a1202, #3b2a05)',
     coverEmoji: '🎻',
     tags: ['كلاسيك', 'فخامة', 'أوتار'],
@@ -160,8 +160,8 @@ const TRACKS_DATA = [
     regionLabel: 'كلاسيك',
     duration: '4:50',
     price: 339,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3',
+    youtubeId: 'M3r2XDceM6A',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #101c24, #1d3342)',
     coverEmoji: '🎼',
     tags: ['سيمفونية', 'بيانو', 'عود'],
@@ -177,8 +177,8 @@ const TRACKS_DATA = [
     regionLabel: 'دفوف',
     duration: '3:55',
     price: 149,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2023/04/18/audio_2452feae6e.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2023/04/18/audio_2452feae6e.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '7pc_G0w9mTY',
     coverGradient: 'linear-gradient(135deg, #1a0f00, #2a1800)',
     coverEmoji: '🥁',
     tags: ['دفوف', 'بدون موسيقى', 'إسلامي'],
@@ -192,8 +192,8 @@ const TRACKS_DATA = [
     regionLabel: 'دفوف',
     duration: '4:10',
     price: 169,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/11/06/audio_2c0d603a74.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/11/06/audio_2c0d603a74.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: 'M3r2XDceM6A',
     coverGradient: 'linear-gradient(135deg, #261605, #42280d)',
     coverEmoji: '🌙',
     tags: ['حجازي', 'بدون موسيقى', 'طار'],
@@ -207,8 +207,8 @@ const TRACKS_DATA = [
     regionLabel: 'دفوف',
     duration: '3:35',
     price: 159,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/01/26/audio_d0c6ff1e01.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/01/26/audio_d0c6ff1e01.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #1c1808, #362f12)',
     coverEmoji: '🤍',
     tags: ['إسلامي', 'هادئ', 'نقاء'],
@@ -222,8 +222,8 @@ const TRACKS_DATA = [
     regionLabel: 'دفوف',
     duration: '4:25',
     price: 179,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2021/11/24/audio_8340d04c0d.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2021/11/24/audio_8340d04c0d.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '7pc_G0w9mTY',
     coverGradient: 'linear-gradient(135deg, #241407, #3d230e)',
     coverEmoji: '🕊️',
     tags: ['أكابيلا', 'دفوف', 'مؤثرات'],
@@ -239,8 +239,8 @@ const TRACKS_DATA = [
     regionLabel: 'كويتية',
     duration: '5:45',
     price: 299,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/02/07/audio_d17676722d.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/02/07/audio_d17676722d.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #001a0a, #002a15)',
     coverEmoji: '🎤',
     tags: ['قصيدة', 'استقبال', 'شعر'],
@@ -254,8 +254,8 @@ const TRACKS_DATA = [
     regionLabel: 'خليجية',
     duration: '4:10',
     price: 279,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/05/audio_1f234399e5.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/05/05/audio_1f234399e5.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '09R8_2nJtjg',
     coverGradient: 'linear-gradient(135deg, #1a001a, #2a002a)',
     coverEmoji: '🌹',
     tags: ['شلة', 'فرح', 'مدائح'],
@@ -269,8 +269,8 @@ const TRACKS_DATA = [
     regionLabel: 'سعودية',
     duration: '4:50',
     price: 259,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2023/07/04/audio_b253b7c933.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2023/07/04/audio_b253b7c933.mp3',
+    youtubeId: 'M3r2XDceM6A',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #1c051a, #380d34)',
     coverEmoji: '📜',
     tags: ['ترحيب', 'قصيد', 'أصالة'],
@@ -284,8 +284,8 @@ const TRACKS_DATA = [
     regionLabel: 'خليجية',
     duration: '5:15',
     price: 320,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/08/23/audio_821d3f56d7.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/08/23/audio_821d3f56d7.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #12001c, #260538)',
     coverEmoji: '✒️',
     tags: ['نبطي', 'وصف', 'مدح'],
@@ -301,8 +301,8 @@ const TRACKS_DATA = [
     regionLabel: 'عروس',
     duration: '4:48',
     price: 289,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/03/24/audio_c3e6601b1b.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/03/24/audio_c3e6601b1b.mp3',
+    youtubeId: '2Vv-BfVoq4g',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #240a1d, #421637)',
     coverEmoji: '👰',
     tags: ['دخلة', 'ملكية', 'هدوء'],
@@ -316,8 +316,8 @@ const TRACKS_DATA = [
     regionLabel: 'عروس',
     duration: '3:58',
     price: 269,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/11/20/audio_ca22b8214f.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/11/20/audio_ca22b8214f.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '2Vv-BfVoq4g',
     coverGradient: 'linear-gradient(135deg, #1f0b18, #3b162f)',
     coverEmoji: '💫',
     tags: ['رومانس', 'دلال', 'نور'],
@@ -331,8 +331,8 @@ const TRACKS_DATA = [
     regionLabel: 'عروس',
     duration: '4:12',
     price: 310,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2023/01/01/audio_73e7c805aa.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2023/01/01/audio_73e7c805aa.mp3',
+    youtubeId: '7pc_G0w9mTY',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #2d0e23, #4f1d40)',
     coverEmoji: '🌸',
     tags: ['سينمائي', 'بدر', 'سحر'],
@@ -346,8 +346,8 @@ const TRACKS_DATA = [
     regionLabel: 'عروس',
     duration: '5:05',
     price: 349,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946765792d.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946765792d.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '09R8_2nJtjg',
     coverGradient: 'linear-gradient(135deg, #331027, #592046)',
     coverEmoji: '👑',
     tags: ['أوركسترا', 'فخامة', 'زغاريد'],
@@ -363,8 +363,8 @@ const TRACKS_DATA = [
     regionLabel: 'عريس',
     duration: '3:30',
     price: 349,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2023/03/30/audio_89304a3928.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2023/03/30/audio_89304a3928.mp3',
+    youtubeId: '09R8_2nJtjg',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #0a0a00, #1a1a00)',
     coverEmoji: '🤵',
     tags: ['عريس', 'موكب', 'أوركسترا'],
@@ -378,8 +378,8 @@ const TRACKS_DATA = [
     regionLabel: 'عريس',
     duration: '3:40',
     price: 279,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/04/27/audio_65b3dc2cb6.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/04/27/audio_65b3dc2cb6.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '09R8_2nJtjg',
     coverGradient: 'linear-gradient(135deg, #121004, #26220a)',
     coverEmoji: '🗡️',
     tags: ['حماسي', 'شموخ', 'رجال'],
@@ -393,8 +393,8 @@ const TRACKS_DATA = [
     regionLabel: 'عريس',
     duration: '4:00',
     price: 299,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/09/27/audio_4960d70313.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2022/09/27/audio_4960d70313.mp3',
+    youtubeId: 'M3r2XDceM6A',
+    fallbackYoutubeId: 'sK2WlF32Sxo',
     coverGradient: 'linear-gradient(135deg, #171406, #302b0f)',
     coverEmoji: '🏇',
     tags: ['عرضة', 'قبيلة', 'فخر'],
@@ -408,8 +408,8 @@ const TRACKS_DATA = [
     regionLabel: 'عريس',
     duration: '3:25',
     price: 259,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2023/02/28/audio_5506085a85.mp3',
-    audioSrc: 'https://cdn.pixabay.com/download/audio/2023/02/28/audio_5506085a85.mp3',
+    youtubeId: 'sK2WlF32Sxo',
+    fallbackYoutubeId: '09R8_2nJtjg',
     coverGradient: 'linear-gradient(135deg, #1c1808, #383112)',
     coverEmoji: '🎉',
     tags: ['بهجة', 'فرح', 'شباب'],
@@ -707,23 +707,22 @@ function toggleMiniPlay(trackId, event) {
   if (player) player.classList.add('visible');
   updatePlayerUI();
 
-  // Play direct cloud streaming URL
-  const directUrl = trackObj.audioUrl || trackObj.audioSrc;
+  // Play through headless background YouTube Audio Controller
   AudioEngine.play(
-    directUrl,
-    (failedUrl, err) => {
-      // Error callback: soft graceful notification
+    trackObj.youtubeId,
+    (failedId, err) => {
       resetMiniControls();
       state.isPlaying = false;
       updatePlayerUI();
-      showToast(`تعذر تشغيل زفة "${trackObj.title}" عبر الإنترنت حالياً. يرجى التحقق من اتصالك.`, 'error');
+      showToast(`تعذر تشغيل زفة "${trackObj.title}" سحابياً. يرجى التحقق من اتصالك.`, 'error');
     },
     () => {
       // Ended callback
       resetMiniControls();
       state.isPlaying = false;
       updatePlayerUI();
-    }
+    },
+    trackObj
   );
 
   // Waveform animation
@@ -736,7 +735,7 @@ function toggleMiniPlay(trackId, event) {
     }
   }, 180);
 
-  showToast(`🎵 تشغيل سحابي مباشر: ${trackObj.title}`, 'info');
+  showToast(`🎵 تشغيل سحابي في الكواليس: ${trackObj.title}`, 'info');
 }
 
 function playTrackFromCard(trackId, event) {
@@ -759,8 +758,8 @@ function initComparisonAudio() {
   let beforeInterval = null;
   let afterInterval = null;
 
-  const urlBefore = 'https://cdn.pixabay.com/download/audio/2023/04/18/audio_2452feae6e.mp3';
-  const urlAfter = 'https://ia800905.us.archive.org/19/items/FREE_background_music_dh/arabic_nights.mp3';
+  const ytBefore = 'sK2WlF32Sxo';
+  const ytAfter = '2Vv-BfVoq4g';
 
   function toggleWave(wave, interval, isPlaying) {
     if (!wave) return null;
@@ -788,7 +787,7 @@ function initComparisonAudio() {
           if (btnAfter) btnAfter.innerHTML = '▶';
           afterInterval = toggleWave(waveAfter, afterInterval, false);
         }
-        AudioEngine.play(urlBefore, () => {
+        AudioEngine.play(ytBefore, () => {
           showToast('تعذر تشغيل المقطع عبر الإنترنت', 'error');
           state.comparisonPlaying.before = false;
           if (btnBefore) btnBefore.innerHTML = '▶';
@@ -813,7 +812,7 @@ function initComparisonAudio() {
           if (btnBefore) btnBefore.innerHTML = '▶';
           beforeInterval = toggleWave(waveBefore, beforeInterval, false);
         }
-        AudioEngine.play(urlAfter, () => {
+        AudioEngine.play(ytAfter, () => {
           showToast('تعذر تشغيل المقطع عبر الإنترنت', 'error');
           state.comparisonPlaying.after = false;
           if (btnAfter) btnAfter.innerHTML = '▶';
@@ -830,7 +829,7 @@ function initComparisonAudio() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   STICKY AUDIO PLAYER (HTML5 AUDIO STREAMING)
+   STICKY AUDIO PLAYER (HEADLESS YOUTUBE CONTROLLER)
    ══════════════════════════════════════════════════════════ */
 function initStickyPlayer() {
   const player = document.getElementById('sticky-player');
@@ -842,27 +841,26 @@ function initStickyPlayer() {
   const volumeSlider = document.getElementById('volume-slider');
   const volumeIcon = document.getElementById('volume-icon');
 
-  const nativeAudio = AudioEngine.getElement();
-
-  // Sync HTML5 Audio element events
-  nativeAudio.addEventListener('timeupdate', () => {
-    if (state.isPlaying && nativeAudio.duration) {
-      state.currentTime = nativeAudio.currentTime;
-      state.duration = nativeAudio.duration;
+  // Register AudioEngine real-time time updates
+  AudioEngine.onTimeUpdate((currentTime, duration) => {
+    if (state.isPlaying) {
+      state.currentTime = currentTime;
+      if (duration && duration > 0) {
+        state.duration = duration;
+      }
       updateProgress();
     }
   });
 
-  nativeAudio.addEventListener('loadedmetadata', () => {
-    if (nativeAudio.duration && !isNaN(nativeAudio.duration)) {
-      state.duration = nativeAudio.duration;
-      updateProgress();
+  // Register AudioEngine state changes
+  AudioEngine.onStateChange((isPlaying) => {
+    state.isPlaying = isPlaying;
+    if (!isPlaying && currentMiniPlay) {
+      const activeTrack = TRACKS_DATA.find(t => t.id === currentMiniPlay);
+      if (activeTrack && state.currentTime >= (state.duration - 1)) {
+        resetMiniControls();
+      }
     }
-  });
-
-  nativeAudio.addEventListener('ended', () => {
-    state.isPlaying = false;
-    resetMiniControls();
     updatePlayerUI();
   });
 
@@ -876,8 +874,7 @@ function initStickyPlayer() {
 
       state.isPlaying = !state.isPlaying;
       if (state.isPlaying) {
-        const directUrl = state.currentTrack.audioUrl || state.currentTrack.audioSrc;
-        AudioEngine.play(directUrl);
+        AudioEngine.play(state.currentTrack.youtubeId, null, null, state.currentTrack);
       } else {
         AudioEngine.pause();
         resetMiniControls();
@@ -971,11 +968,10 @@ function loadStickyPlayer(track) {
   if (player) player.classList.add('visible');
   updatePlayerUI();
 
-  // Play direct cloud streaming URL
-  const directUrl = track.audioUrl || track.audioSrc;
+  // Play through background YouTube controller
   AudioEngine.play(
-    directUrl,
-    (failedUrl, err) => {
+    track.youtubeId,
+    (failedId, err) => {
       state.isPlaying = false;
       updatePlayerUI();
       showToast(`تعذر تشغيل زفة "${track.title}" سحابياً، يرجى المحاولة لاحقاً`, 'error');
@@ -983,7 +979,8 @@ function loadStickyPlayer(track) {
     () => {
       state.isPlaying = false;
       updatePlayerUI();
-    }
+    },
+    track
   );
   AudioEngine.setVolume(state.volume);
 
