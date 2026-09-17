@@ -766,18 +766,35 @@
       </div>
     </div>
 
-    <!-- Right Controls -->
-    <div class="player-right">
-      <div class="volume-wrap">
-        <span class="volume-icon" id="volume-icon" aria-label="الصوت">🔊</span>
-        <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="75" aria-label="مستوى الصوت" />
-      </div>
-      <button class="player-close-btn" id="player-close" aria-label="إغلاق المشغل">✕</button>
-    </div>
-  </div>
-</div>
+<!-- ══════════════════════════════════════════════════════
+     MOBILE BOTTOM APP NAVIGATION (للهواتف)
+     ══════════════════════════════════════════════════════ -->
+<nav class="mobile-bottom-nav" aria-label="شريط التنقل السفلي">
+  <a href="#hero" class="mobile-nav-item active">
+    <span class="mn-icon">🏠</span>
+    <span>الرئيسية</span>
+  </a>
+  <a href="#catalog" class="mobile-nav-item">
+    <span class="mn-icon">🎵</span>
+    <span>الزفات</span>
+  </a>
+  <a href="#how-it-works" class="mobile-nav-item">
+    <span class="mn-icon">⚡</span>
+    <span>الخطوات</span>
+  </a>
+  <a href="#pricing" class="mobile-nav-item">
+    <span class="mn-icon">💎</span>
+    <span>الباقات</span>
+  </a>
+  <a href="admin.html" class="mobile-nav-item">
+    <span class="mn-icon">🔐</span>
+    <span>المدير</span>
+  </a>
+</nav>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
 <script src="js/tracks-store.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/app.js"></script>

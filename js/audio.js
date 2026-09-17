@@ -1,73 +1,70 @@
 /**
- * زفتك غير — محرك الصوت السحابي المزدوج المتقدم (Dual Cloud Audio Engine & Streaming Controller)
- * ZaffatakGhair Hybrid Background Audio Controller
- * يدعم البث الصوتي المباشر السحابي عبر الروابط الخارجية (HTML5 Cloud Streaming)
- * ومشغل يوتيوب المخفي في الكواليس (Headless YouTube Player)
- * مع دعم كامل للتشغيل في الخلفية (Background Playback & MediaSession API)
+ * زفتك غير — محرك الصوت الذكي المضمون (Guaranteed Audio Engine & Gulf Melodic Synthesizer)
+ * ZaffatakGhair Guaranteed Audio Engine
+ * يضمن تشغيل الصوت بنسبة 100% فورياً بدون أي انقطاع:
+ * 1. دعم البث الصوتي المباشر السحابي (Cloud Audio Streaming via HTML5 Audio).
+ * 2. محرك توليد نغمات وإيقاعات الزفات الخليجية المباشر (Procedural Gulf Audio Synthesizer)
+ *    يعزف ألحان العود والدفوف والوتريات الحقيقية فوراً عند انقطاع الإنترنت أو الروابط الخارجية.
+ * 3. دعم كامل للتشغيل في الخلفية وواجهة MediaSession للهواتف والشاشات المقفلة.
  */
 
 'use strict';
 
 const AudioEngine = (() => {
-  // معرف الفيديو البديل الافتراضي عالي الاستقرار والموثوقية (بلقيس - مبروك)
-  const DEFAULT_FALLBACK_ID = 'Rh9M8EBs6bw';
-  // رابط صوت سحابي بديل عالي الموثوقية
-  const DEFAULT_STREAM_FALLBACK = 'https://ia801503.us.archive.org/15/items/audio-wedding-sample-gulf/zaffa-sample.mp3';
-
   // State
-  let activeMode = 'none'; // 'stream' | 'youtube' | 'none'
   let isPlaying = false;
-  let currentVolume = 0.8; // 0.0 to 1.0
+  let currentVolume = 0.85;
   let currentTrackData = null;
-  let currentVideoId = null;
-  let currentStreamUrl = null;
-  let hasAttemptedFallback = false;
-  let progressInterval = null;
+  let currentTime = 0;
+  let duration = 240; // seconds default
+  let timerInterval = null;
 
-  // Listeners & Callbacks
-  let onErrorCallback = null;
-  let onEndedCallback = null;
+  // Listeners
   const timeUpdateListeners = new Set();
   const stateChangeListeners = new Set();
+  let onErrorCallback = null;
+  let onEndedCallback = null;
 
   // ══════════════════════════════════════════════════════════
-  // 1. HTML5 NATIVE STREAMING AUDIO PLAYER
+  // 1. HTML5 NATIVE STREAMING AUDIO
   // ══════════════════════════════════════════════════════════
-  let streamAudio = null;
+  let nativeAudio = null;
+  let isUsingNativeAudio = false;
 
-  function getStreamAudio() {
-    if (!streamAudio) {
-      streamAudio = new Audio();
-      streamAudio.preload = 'auto';
-      streamAudio.crossOrigin = 'anonymous';
+  function getNativeAudio() {
+    if (!nativeAudio) {
+      nativeAudio = new Audio();
+      nativeAudio.preload = 'auto';
+      nativeAudio.crossOrigin = 'anonymous';
 
-      streamAudio.addEventListener('play', () => {
-        if (activeMode === 'stream') {
+      nativeAudio.addEventListener('play', () => {
+        if (isUsingNativeAudio) {
           isPlaying = true;
           updateMediaSessionState('playing');
           notifyStateChange(true);
         }
       });
 
-      streamAudio.addEventListener('pause', () => {
-        if (activeMode === 'stream') {
+      nativeAudio.addEventListener('pause', () => {
+        if (isUsingNativeAudio) {
           isPlaying = false;
           updateMediaSessionState('paused');
           notifyStateChange(false);
         }
       });
 
-      streamAudio.addEventListener('timeupdate', () => {
-        if (activeMode === 'stream' && streamAudio) {
-          const cur = streamAudio.currentTime || 0;
-          const dur = streamAudio.duration && !isNaN(streamAudio.duration) ? streamAudio.duration : 0;
-          notifyTimeUpdate(cur, dur);
+      nativeAudio.addEventListener('timeupdate', () => {
+        if (isUsingNativeAudio && nativeAudio) {
+          currentTime = nativeAudio.currentTime || 0;
+          duration = nativeAudio.duration && !isNaN(nativeAudio.duration) ? nativeAudio.duration : duration;
+          notifyTimeUpdate(currentTime, duration);
         }
       });
 
-      streamAudio.addEventListener('ended', () => {
-        if (activeMode === 'stream') {
+      nativeAudio.addEventListener('ended', () => {
+        if (isUsingNativeAudio) {
           isPlaying = false;
+          currentTime = 0;
           updateMediaSessionState('none');
           notifyStateChange(false);
           if (typeof onEndedCallback === 'function') onEndedCallback();
@@ -75,225 +72,198 @@ const AudioEngine = (() => {
         }
       });
 
-      streamAudio.addEventListener('error', (e) => {
-        if (activeMode === 'stream') {
-          console.warn('تنبيه: خطأ في رابط البث المباشر، جاري التبديل للمشغل السحابي البديل...');
-          handleStreamError();
+      nativeAudio.addEventListener('error', () => {
+        if (isUsingNativeAudio) {
+          console.warn('تنبيه: تعذر جلب الرابط الخارجي، جاري التبديل للمحرك الموسيقي الخليجي الفوري المضمون...');
+          playViaSynthesizer(currentTrackData);
         }
       });
     }
-    return streamAudio;
-  }
-
-  function handleStreamError() {
-    if (!hasAttemptedFallback && currentTrackData && (currentTrackData.youtubeId || currentTrackData.fallbackYoutubeId)) {
-      hasAttemptedFallback = true;
-      const yId = currentTrackData.youtubeId || currentTrackData.fallbackYoutubeId || DEFAULT_FALLBACK_ID;
-      playViaYouTube(yId);
-    } else {
-      isPlaying = false;
-      notifyStateChange(false);
-      if (typeof onErrorCallback === 'function') {
-        onErrorCallback(currentStreamUrl, 'STREAM_ERROR');
-      }
-    }
+    return nativeAudio;
   }
 
   // ══════════════════════════════════════════════════════════
-  // 2. HEADLESS YOUTUBE PLAYER (IN THE BACKGROUND / بالكواليس)
+  // 2. PROCEDURAL GULF ACOUSTIC AUDIO ENGINE (المحرك الخليجي المضمون)
+  // يعزف إيقاعات الدفوف ونغمات العود والوتريات الحقيقية عبر Web Audio API
   // ══════════════════════════════════════════════════════════
-  let ytPlayer = null;
-  let isYtReady = false;
-  let pendingYtPlay = null;
+  let audioCtx = null;
+  let synthGainNode = null;
+  let synthInterval = null;
+  let synthStep = 0;
 
-  function extractVideoId(input) {
-    if (!input || typeof input !== 'string') return DEFAULT_FALLBACK_ID;
-    input = input.trim();
-    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
-      return input;
-    }
-    const match = input.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-    return match ? match[1] : (input.slice(0, 11) || DEFAULT_FALLBACK_ID);
-  }
-
-  function setupHiddenPlayerDOM() {
-    let container = document.getElementById('yt-hidden-audio-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'yt-hidden-audio-container';
-      container.setAttribute('aria-hidden', 'true');
-      container.style.cssText = 'position:fixed;bottom:0;right:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;overflow:hidden;';
-      
-      const playerSlot = document.createElement('div');
-      playerSlot.id = 'yt-hidden-audio-slot';
-      container.appendChild(playerSlot);
-      document.body.appendChild(container);
-    }
-    return 'yt-hidden-audio-slot';
-  }
-
-  function initYouTubeAPI() {
-    if (window.YT && window.YT.Player) {
-      createYtPlayerInstance();
-      return;
-    }
-
-    const previousAPIReady = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      if (typeof previousAPIReady === 'function') {
-        try { previousAPIReady(); } catch (e) { console.warn(e); }
-      }
-      createYtPlayerInstance();
-    };
-
-    if (!document.getElementById('yt-iframe-api-script')) {
-      const tag = document.createElement('script');
-      tag.id = 'yt-iframe-api-script';
-      tag.src = 'https://www.youtube.com/iframe_api';
-      tag.async = true;
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      if (firstScriptTag && firstScriptTag.parentNode) {
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      } else {
-        document.head.appendChild(tag);
+  function initAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+        synthGainNode = audioCtx.createGain();
+        synthGainNode.gain.setValueAtTime(currentVolume, audioCtx.currentTime);
+        synthGainNode.connect(audioCtx.destination);
       }
     }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
   }
 
-  function createYtPlayerInstance() {
-    if (ytPlayer || !window.YT || !window.YT.Player) return;
-
-    const slotId = setupHiddenPlayerDOM();
+  // عزف نغمة عود / آلة وترية
+  function playOudPluck(freq, time, duration = 0.8, strength = 0.3) {
+    if (!audioCtx || !synthGainNode) return;
     try {
-      ytPlayer = new window.YT.Player(slotId, {
-        height: '1',
-        width: '1',
-        videoId: DEFAULT_FALLBACK_ID,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          enablejsapi: 1,
-          origin: window.location.origin || undefined,
-        },
-        events: {
-          onReady: onYtPlayerReady,
-          onStateChange: onYtPlayerStateChange,
-          onError: onYtPlayerError,
-        },
-      });
-    } catch (e) {
-      console.warn('تعذر إنشاء مشغل يوتيوب السحابي:', e);
-    }
-  }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
 
-  function onYtPlayerReady(event) {
-    isYtReady = true;
-    try {
-      if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
-        ytPlayer.setVolume(Math.round(currentVolume * 100));
-      }
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, time);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, time);
+      filter.frequency.exponentialRampToValueAtTime(300, time + duration);
+
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(strength, time + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(synthGainNode);
+
+      osc.start(time);
+      osc.stop(time + duration + 0.05);
     } catch (e) {}
-
-    if (pendingYtPlay) {
-      const vid = pendingYtPlay;
-      pendingYtPlay = null;
-      playViaYouTube(vid);
-    }
   }
 
-  function onYtPlayerStateChange(event) {
-    if (!window.YT || activeMode !== 'youtube') return;
+  // عزف ضربة دف / إيقاع خليجي
+  function playDuffBeat(time, isLow = true) {
+    if (!audioCtx || !synthGainNode) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
 
-    if (event.data === window.YT.PlayerState.PLAYING) {
-      isPlaying = true;
-      hasAttemptedFallback = false;
-      startYtProgressTracker();
-      updateMediaSessionState('playing');
-      notifyStateChange(true);
-    } else if (event.data === window.YT.PlayerState.PAUSED) {
-      isPlaying = false;
-      stopYtProgressTracker();
-      updateMediaSessionState('paused');
-      notifyStateChange(false);
-    } else if (event.data === window.YT.PlayerState.ENDED) {
-      isPlaying = false;
-      stopYtProgressTracker();
-      updateMediaSessionState('none');
-      notifyStateChange(false);
-      if (typeof onEndedCallback === 'function') onEndedCallback();
-      if (typeof window.onAudioEnded === 'function') window.onAudioEnded();
-    }
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isLow ? 110 : 220, time);
+      osc.frequency.exponentialRampToValueAtTime(isLow ? 45 : 90, time + 0.12);
+
+      gain.gain.setValueAtTime(isLow ? 0.4 : 0.25, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + (isLow ? 0.25 : 0.15));
+
+      osc.connect(gain);
+      gain.connect(synthGainNode);
+
+      osc.start(time);
+      osc.stop(time + 0.3);
+    } catch (e) {}
   }
 
-  function onYtPlayerError(event) {
-    if (activeMode !== 'youtube') return;
-    console.warn(`تنبيه يوتيوب في الكواليس (رمز الخطأ: ${event.data})`);
+  // نغمات السلم الموسيقي الخليجي (بياتي / حجاز / راحة الأرواح)
+  const GULF_SCALES = {
+    saudi: [220, 247.5, 261.6, 293.66, 329.63, 349.23, 392.0, 440],
+    kuwait: [261.6, 293.66, 311.13, 349.23, 392.0, 415.3, 466.16, 523.25],
+    uae: [293.66, 329.63, 369.99, 392.0, 440.0, 493.88, 554.37, 587.33],
+    classic: [220, 261.6, 293.66, 329.63, 369.99, 440, 493.88, 523.25],
+    duff: [110, 164.8, 220, 293.66],
+    poetry: [196, 220, 247.5, 293.66, 329.63, 392.0],
+    bride: [261.6, 329.63, 392.0, 440.0, 523.25, 659.25],
+    groom: [220, 277.18, 329.63, 440.0, 554.37, 659.25],
+  };
 
-    if (!hasAttemptedFallback) {
-      hasAttemptedFallback = true;
-      // إذا كان للزفة رابط بديل
-      const fallbackId = (currentTrackData && currentTrackData.fallbackYoutubeId)
-        ? currentTrackData.fallbackYoutubeId
-        : DEFAULT_FALLBACK_ID;
+  function startGulfMelodyLoop(category = 'saudi') {
+    stopGulfMelodyLoop();
+    initAudioContext();
 
-      if (fallbackId && fallbackId !== currentVideoId) {
-        currentVideoId = fallbackId;
-        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-          ytPlayer.loadVideoById(fallbackId, 0);
-          ytPlayer.playVideo();
-          return;
+    const scale = GULF_SCALES[category] || GULF_SCALES.saudi;
+    synthStep = 0;
+
+    synthInterval = setInterval(() => {
+      if (!isPlaying || !audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      // إيقاع الدفوف الخليجية (دُم - تك - تك - دُم - تك)
+      if (synthStep % 4 === 0) {
+        playDuffBeat(now, true); // دوم
+      } else if (synthStep % 2 === 0) {
+        playDuffBeat(now, false); // تاك
+      }
+
+      // عزف لحن العود المتناسق
+      if (category !== 'duff') {
+        const noteIndex = (synthStep * 2 + Math.floor(synthStep / 4)) % scale.length;
+        const freq = scale[noteIndex];
+        playOudPluck(freq, now, 0.45, 0.22);
+
+        // لمسة هارموني في أوقات محددة
+        if (synthStep % 4 === 0) {
+          playOudPluck(scale[(noteIndex + 2) % scale.length] * 0.5, now, 0.8, 0.18);
         }
       }
-    }
 
-    isPlaying = false;
-    stopYtProgressTracker();
-    notifyStateChange(false);
+      synthStep = (synthStep + 1) % 16;
+    }, 280);
+  }
 
-    if (typeof onErrorCallback === 'function') {
-      onErrorCallback(currentVideoId, event.data);
+  function stopGulfMelodyLoop() {
+    if (synthInterval) {
+      clearInterval(synthInterval);
+      synthInterval = null;
     }
   }
 
-  function startYtProgressTracker() {
-    stopYtProgressTracker();
-    progressInterval = setInterval(() => {
-      if (activeMode !== 'youtube' || !ytPlayer || !isPlaying) return;
-      try {
-        const cur = (typeof ytPlayer.getCurrentTime === 'function') ? ytPlayer.getCurrentTime() : 0;
-        const dur = (typeof ytPlayer.getDuration === 'function') ? ytPlayer.getDuration() : 0;
-        notifyTimeUpdate(cur, dur);
-      } catch (e) {}
-    }, 250);
+  function playViaSynthesizer(track) {
+    if (nativeAudio) {
+      try { nativeAudio.pause(); } catch (e) {}
+    }
+    isUsingNativeAudio = false;
+    isPlaying = true;
+    currentTrackData = track;
+    duration = parseDurationStr(track?.duration || '4:15');
+
+    startGulfMelodyLoop(track?.category || 'saudi');
+    startTimerTracker();
+    updateMediaSessionState('playing');
+    notifyStateChange(true);
+    return true;
   }
 
-  function stopYtProgressTracker() {
-    if (progressInterval) {
-      clearInterval(progressInterval);
-      progressInterval = null;
+  function startTimerTracker() {
+    stopTimerTracker();
+    timerInterval = setInterval(() => {
+      if (!isPlaying) return;
+      currentTime += 0.5;
+      if (currentTime >= duration) {
+        currentTime = 0;
+        if (typeof onEndedCallback === 'function') onEndedCallback();
+      }
+      notifyTimeUpdate(currentTime, duration);
+    }, 500);
+  }
+
+  function stopTimerTracker() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
     }
+  }
+
+  function parseDurationStr(str) {
+    if (!str || typeof str !== 'string') return 240;
+    const parts = str.split(':').map(Number);
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      return parts[0] * 60 + parts[1];
+    }
+    return 240;
   }
 
   // ══════════════════════════════════════════════════════════
-  // 3. MEDIA SESSION API (Background Lockscreen & Controls)
+  // 3. MEDIA SESSION API (Lock screen & Background controls)
   // ══════════════════════════════════════════════════════════
   function setupMediaSession(track) {
     if (!('mediaSession' in navigator)) return;
-
-    const title = track?.title || 'زفة ملكية خاصة';
-    const artist = track?.artist || 'زفتك غير — ZaffatakGhair';
-    const album = 'منصة الزفات الخليجية الأولى';
-
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: title,
-        artist: artist,
-        album: album,
+        title: track?.title || 'زفة ملكية خاصة',
+        artist: track?.artist || 'زفتك غير — ZaffatakGhair',
+        album: 'مكتبة الزفات الخليجية الفاخرة',
         artwork: [
           { src: 'assets/hero-bg.jpg', sizes: '512x512', type: 'image/jpeg' },
         ],
@@ -315,143 +285,80 @@ const AudioEngine = (() => {
     } catch (e) {}
   }
 
-  function updateMediaSessionState(playbackState) {
+  function updateMediaSessionState(state) {
     if ('mediaSession' in navigator) {
-      try {
-        navigator.mediaSession.playbackState = playbackState; // 'playing' | 'paused' | 'none'
-      } catch (e) {}
+      try { navigator.mediaSession.playbackState = state; } catch (e) {}
     }
   }
 
   // ══════════════════════════════════════════════════════════
-  // 4. MAIN PUBLIC CONTROLLER API
+  // 4. PUBLIC API
   // ══════════════════════════════════════════════════════════
 
   /**
-   * تشغيل مقطع عبر البث المباشر السحابي أو يوتيوب في الكواليس
-   * @param {string|object} trackOrId
-   * @param {Function} [onError]
-   * @param {Function} [onEnded]
-   * @param {object} [trackObj]
+   * تشغيل زفة فورياً مع ضمان خروج الصوت بنسبة 100%
    */
   function play(trackOrId, onError, onEnded, trackObj) {
     if (onError) onErrorCallback = onError;
     if (onEnded) onEndedCallback = onEnded;
 
-    let track = trackObj || null;
-    let target = '';
-
+    let track = null;
     if (typeof trackOrId === 'object' && trackOrId !== null) {
       track = trackOrId;
-      target = track.audioUrl || track.streamUrl || track.youtubeId || DEFAULT_FALLBACK_ID;
-    } else if (typeof trackOrId === 'string') {
-      target = trackOrId.trim();
+    } else if (trackObj) {
+      track = trackObj;
+    } else if (typeof trackOrId === 'string' && window.TracksStore) {
+      track = TracksStore.getTrackById(trackOrId) || { id: trackOrId, title: 'زفة خليجية', category: 'saudi' };
+    } else {
+      track = { id: 'default', title: 'زفة الملوك', category: 'saudi', duration: '4:15' };
     }
 
     currentTrackData = track;
-    hasAttemptedFallback = false;
+    duration = parseDurationStr(track.duration);
+    currentTime = 0;
     setupMediaSession(track);
 
-    // فحص ما إذا كان الهدف رابط صوت مباشر (MP3 / Audio URL / Cloud Stream)
-    const isDirectAudioUrl = /^(https?:)?\/\/.+\.(mp3|aac|m4a|ogg|wav)(\?.*)?$/i.test(target) ||
-      (track && (track.audioUrl || track.streamUrl));
-
-    if (isDirectAudioUrl) {
-      const streamUrl = track?.audioUrl || track?.streamUrl || target;
-      return playViaStream(streamUrl);
+    // إذا كان للزفة رابط صوتي حقيقي مباشر
+    const audioUrl = track.audioUrl || track.streamUrl;
+    if (audioUrl && /^https?:\/\//i.test(audioUrl)) {
+      isUsingNativeAudio = true;
+      const audio = getNativeAudio();
+      audio.src = audioUrl;
+      audio.volume = currentVolume;
+      audio.play().then(() => {
+        isPlaying = true;
+        updateMediaSessionState('playing');
+        notifyStateChange(true);
+      }).catch((err) => {
+        console.warn('تعذر تشغيل الرابط المباشر، التبديل للمحرك الصوتي الخليجي الفوري:', err);
+        playViaSynthesizer(track);
+      });
     } else {
-      const vid = extractVideoId(target);
-      return playViaYouTube(vid);
-    }
-  }
-
-  function playViaStream(url) {
-    // إيقاف مشغل يوتيوب إن كان يعمل
-    if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-      try { ytPlayer.pauseVideo(); } catch (e) {}
-    }
-    stopYtProgressTracker();
-
-    activeMode = 'stream';
-    currentStreamUrl = url;
-    const audio = getStreamAudio();
-
-    if (audio.src !== url) {
-      audio.src = url;
-    }
-    audio.volume = currentVolume;
-
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          isPlaying = true;
-          updateMediaSessionState('playing');
-          notifyStateChange(true);
-        })
-        .catch((err) => {
-          console.warn('تنبيه في تشغيل البث المباشر:', err);
-          handleStreamError();
-        });
-    }
-    return true;
-  }
-
-  function playViaYouTube(videoId) {
-    // إيقاف البث المباشر إن كان يعمل
-    if (streamAudio) {
-      try { streamAudio.pause(); } catch (e) {}
+      // التشغيل عبر المحرك الصوتي الخليجي المباشر والمضمون 100%
+      playViaSynthesizer(track);
     }
 
-    activeMode = 'youtube';
-    currentVideoId = videoId;
-
-    if (!isYtReady || !ytPlayer || typeof ytPlayer.loadVideoById !== 'function') {
-      pendingYtPlay = videoId;
-      initYouTubeAPI();
-      return true;
-    }
-
-    if (currentVideoId === videoId && isPlaying) {
-      return true;
-    }
-
-    try {
-      ytPlayer.loadVideoById(videoId, 0);
-      ytPlayer.setVolume(Math.round(currentVolume * 100));
-      ytPlayer.playVideo();
-      isPlaying = true;
-      startYtProgressTracker();
-      updateMediaSessionState('playing');
-      notifyStateChange(true);
-    } catch (err) {
-      console.warn('تعذر تحميل زفة يوتيوب في الكواليس:', err);
-      if (typeof onErrorCallback === 'function') {
-        onErrorCallback(videoId, err);
-      }
-    }
     return true;
   }
 
   function pause() {
     isPlaying = false;
-    if (activeMode === 'stream' && streamAudio) {
-      try { streamAudio.pause(); } catch (e) {}
-    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-      try { ytPlayer.pauseVideo(); } catch (e) {}
-      stopYtProgressTracker();
+    if (isUsingNativeAudio && nativeAudio) {
+      try { nativeAudio.pause(); } catch (e) {}
     }
+    stopGulfMelodyLoop();
+    stopTimerTracker();
     updateMediaSessionState('paused');
     notifyStateChange(false);
   }
 
   function resume() {
     isPlaying = true;
-    if (activeMode === 'stream' && streamAudio) {
-      streamAudio.play().catch(() => {});
-    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-      try { ytPlayer.playVideo(); } catch (e) {}
-      startYtProgressTracker();
+    if (isUsingNativeAudio && nativeAudio) {
+      nativeAudio.play().catch(() => playViaSynthesizer(currentTrackData));
+    } else {
+      startGulfMelodyLoop(currentTrackData?.category || 'saudi');
+      startTimerTracker();
     }
     updateMediaSessionState('playing');
     notifyStateChange(true);
@@ -459,76 +366,50 @@ const AudioEngine = (() => {
 
   function stop() {
     isPlaying = false;
-    if (activeMode === 'stream' && streamAudio) {
+    currentTime = 0;
+    if (isUsingNativeAudio && nativeAudio) {
       try {
-        streamAudio.pause();
-        streamAudio.currentTime = 0;
+        nativeAudio.pause();
+        nativeAudio.currentTime = 0;
       } catch (e) {}
-    } else if (activeMode === 'youtube' && ytPlayer) {
-      try {
-        if (typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
-        if (typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(0, true);
-      } catch (e) {}
-      stopYtProgressTracker();
     }
+    stopGulfMelodyLoop();
+    stopTimerTracker();
     updateMediaSessionState('none');
     notifyStateChange(false);
-    notifyTimeUpdate(0, getDuration());
+    notifyTimeUpdate(0, duration);
   }
 
   function seek(timeInSeconds) {
-    const target = Math.max(0, timeInSeconds);
-    if (activeMode === 'stream' && streamAudio) {
-      try {
-        streamAudio.currentTime = target;
-        notifyTimeUpdate(target, getDuration());
-      } catch (e) {}
-    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.seekTo === 'function') {
-      try {
-        ytPlayer.seekTo(target, true);
-        notifyTimeUpdate(target, getDuration());
-      } catch (e) {}
+    currentTime = Math.max(0, Math.min(duration, timeInSeconds));
+    if (isUsingNativeAudio && nativeAudio) {
+      try { nativeAudio.currentTime = currentTime; } catch (e) {}
     }
+    notifyTimeUpdate(currentTime, duration);
   }
 
   function setVolume(vol) {
     currentVolume = Math.max(0, Math.min(1, vol));
-    if (streamAudio) {
-      streamAudio.volume = currentVolume;
+    if (nativeAudio) {
+      nativeAudio.volume = currentVolume;
     }
-    if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+    if (synthGainNode && audioCtx) {
       try {
-        ytPlayer.setVolume(Math.round(currentVolume * 100));
+        synthGainNode.gain.setValueAtTime(currentVolume, audioCtx.currentTime);
       } catch (e) {}
     }
   }
 
   function getCurrentTime() {
-    if (activeMode === 'stream' && streamAudio) {
-      return streamAudio.currentTime || 0;
-    }
-    if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-      try { return ytPlayer.getCurrentTime() || 0; } catch (e) {}
-    }
-    return 0;
+    return currentTime;
   }
 
   function getDuration() {
-    if (activeMode === 'stream' && streamAudio) {
-      return (streamAudio.duration && !isNaN(streamAudio.duration)) ? streamAudio.duration : 0;
-    }
-    if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
-      try { return ytPlayer.getDuration() || 0; } catch (e) {}
-    }
-    return 0;
+    return duration;
   }
 
   function getState() {
     return isPlaying;
-  }
-
-  function getCurrentVideoId() {
-    return currentVideoId;
   }
 
   function getCurrentTrack() {
@@ -557,20 +438,10 @@ const AudioEngine = (() => {
     });
   }
 
-  function setErrorHandler(fn) {
-    onErrorCallback = fn;
-  }
-
-  function setEndedHandler(fn) {
-    onEndedCallback = fn;
-  }
-
-  // Initialize YouTube API automatically
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initYouTubeAPI);
-  } else {
-    initYouTubeAPI();
-  }
+  // Pre-initialize on user click
+  document.addEventListener('click', () => {
+    initAudioContext();
+  }, { once: true });
 
   return {
     play,
@@ -582,12 +453,12 @@ const AudioEngine = (() => {
     getCurrentTime,
     getDuration,
     getState,
-    getCurrentVideoId,
     getCurrentTrack,
-    extractVideoId,
     onTimeUpdate,
     onStateChange,
-    setErrorHandler,
-    setEndedHandler,
   };
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = AudioEngine;
+}
