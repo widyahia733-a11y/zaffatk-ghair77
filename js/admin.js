@@ -440,56 +440,279 @@ function exportAndDeliver() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   LIBRARY MANAGEMENT
+   LIBRARY MANAGEMENT (CRUD + LIVE PREVIEW + JSON SYNC)
    ══════════════════════════════════════════════════════════ */
 
+let adminActiveLibFilter = 'كل';
+let currentPlayingTrackId = null;
+
 function initLibraryForm() {
-  const form = document.getElementById('add-track-form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      showAdminToast('✅ تم إضافة المسار الجديد للمكتبة', 'success');
-      form.reset();
-    });
+  renderAdminLibrary();
+
+  // Listen for external tracks updates
+  window.addEventListener('zg_tracks_updated', () => {
+    renderAdminLibrary(adminActiveLibFilter);
+  });
+}
+
+function filterAdminLibrary(cat) {
+  adminActiveLibFilter = cat;
+  document.querySelectorAll('#library-category-filters [data-lib-filter]').forEach(btn => {
+    const isTarget = btn.dataset.libFilter === cat;
+    btn.classList.toggle('active', isTarget);
+    btn.style.borderColor = isTarget ? 'var(--gold)' : '';
+    btn.style.color = isTarget ? 'var(--gold)' : '';
+  });
+  renderAdminLibrary(cat);
+}
+
+function renderAdminLibrary(filterCategory = adminActiveLibFilter) {
+  const container = document.getElementById('admin-tracks-list');
+  const badge = document.getElementById('library-count-badge');
+  if (!container || !window.TracksStore) return;
+
+  const allTracks = TracksStore.getAllTracks();
+  const filtered = (filterCategory === 'كل')
+    ? allTracks
+    : TracksStore.getTracksByCategory(filterCategory);
+
+  if (badge) {
+    badge.textContent = `${filtered.length} مسار`;
   }
 
-  // Upload zones
-  document.querySelectorAll('.upload-zone').forEach(zone => {
-    zone.addEventListener('click', () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'audio/*';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          zone.querySelector('.upload-label').textContent = `✅ ${file.name}`;
-          zone.style.borderColor = '#4ade80';
-          showAdminToast(`📁 تم رفع: ${file.name}`, 'success');
-        }
-      };
-      input.click();
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:36px 20px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🎵</span>
+        <div style="color:var(--text-primary);font-weight:600;">لا توجد مسارات في هذا التصنيف حالياً</div>
+        <p style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">يمكنك إضافة زفة جديدة الآن عبر النموذج الجانبي</p>
+      </div>
+    `;
+    return;
+  }
+
+  const categoryLabels = {
+    saudi: '🇸🇦 سعودية',
+    kuwait: '🇰🇼 كويتية',
+    uae: '🇦🇪 إماراتية',
+    classic: '🎻 كلاسيك',
+    duff: '🥁 دفوف',
+    poetry: '📜 قصائد',
+    bride: '👰 عروس',
+    groom: '🤵 عريس',
+  };
+
+  container.innerHTML = filtered.map(track => {
+    const isPlaying = currentPlayingTrackId === track.id && window.AudioEngine && window.AudioEngine.getState();
+    const playIcon = isPlaying ? '⏸' : '▶';
+    const activeBorder = isPlaying ? 'border-color:var(--gold);background:rgba(212,175,55,0.08);' : 'border-color:rgba(255,255,255,0.06);';
+
+    return `
+      <div class="admin-track-item" id="admin-track-${track.id}" style="display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid;${activeBorder}border-radius:12px;transition:var(--transition);">
+        <!-- Play / Preview Button -->
+        <button class="action-btn" onclick="previewTrack('${track.id}')" style="width:38px;height:38px;border-radius:50%;background:${isPlaying ? 'var(--gold)' : 'rgba(212,175,55,0.15)'};color:${isPlaying ? '#000' : 'var(--gold)'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;flex-shrink:0;border:1px solid var(--border-gold);" title="تشغيل / إيقاف المعاينة">
+          ${playIcon}
+        </button>
+
+        <!-- Track Cover / Emoji -->
+        <div style="width:42px;height:42px;border-radius:10px;background:${track.coverGradient || 'linear-gradient(135deg,rgba(212,175,55,0.2),rgba(201,121,106,0.1))'};display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">
+          ${track.coverEmoji || '🎵'}
+        </div>
+
+        <!-- Track Details -->
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div style="font-size:0.92rem;color:var(--text-primary);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${track.title}
+            </div>
+            ${track.isCustom ? `<span style="font-size:0.65rem;padding:2px 6px;border-radius:4px;background:rgba(34,197,94,0.15);color:#4ade80;font-weight:600;">✨ مضاف مخصص</span>` : ''}
+            <span style="font-size:0.68rem;padding:2px 8px;border-radius:4px;background:rgba(212,175,55,0.12);color:var(--gold);font-weight:600;">
+              ${categoryLabels[track.category] || track.regionLabel || 'خليجية'}
+            </span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap;">
+            <span>🎙️ ${track.artist || 'أسلوب أصيل'}</span>
+            <span>⏱️ ${track.duration || '4:15'}</span>
+            <span>💰 ${track.price} ر.س</span>
+            ${track.youtubeId ? `<span style="color:var(--gold);opacity:0.8;">🔗 YT: ${track.youtubeId}</span>` : ''}
+            ${track.audioUrl ? `<span style="color:#4ade80;opacity:0.8;">🔊 Stream Link</span>` : ''}
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="action-btn copy" onclick="editTrack('${track.id}')" title="تعديل الزفة">✏️</button>
+          <button class="action-btn" onclick="deleteTrack('${track.id}')" style="color:#ef4444;" title="حذف الزفة">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function previewTrack(trackId) {
+  if (!window.TracksStore || !window.AudioEngine) return;
+
+  const track = TracksStore.getTrackById(trackId);
+  if (!track) return;
+
+  if (currentPlayingTrackId === trackId && AudioEngine.getState()) {
+    AudioEngine.pause();
+    currentPlayingTrackId = null;
+    renderAdminLibrary(adminActiveLibFilter);
+    showAdminToast('⏸ تم إيقاف المعاينة مؤقتاً', 'info');
+    return;
+  }
+
+  currentPlayingTrackId = trackId;
+  renderAdminLibrary(adminActiveLibFilter);
+  showAdminToast(`🎵 تشغيل سحابي بالكواليس: ${track.title}`, 'info');
+
+  AudioEngine.play(
+    track,
+    (failedId, err) => {
+      currentPlayingTrackId = null;
+      renderAdminLibrary(adminActiveLibFilter);
+      showAdminToast(`تعذر تشغيل الزفة "${track.title}"`, 'error');
+    },
+    () => {
+      currentPlayingTrackId = null;
+      renderAdminLibrary(adminActiveLibFilter);
+    },
+    track
+  );
+}
+
+function handleSaveTrackForm(e) {
+  e.preventDefault();
+  if (!window.TracksStore) return;
+
+  const id = document.getElementById('track-edit-id')?.value.trim();
+  const title = document.getElementById('track-title')?.value.trim();
+  const category = document.getElementById('track-category')?.value;
+  const price = document.getElementById('track-price')?.value;
+  const artist = document.getElementById('track-artist')?.value.trim();
+  const duration = document.getElementById('track-duration')?.value.trim();
+  const youtube = document.getElementById('track-youtube')?.value.trim();
+  const fallback = document.getElementById('track-fallback')?.value.trim();
+  const tags = document.getElementById('track-tags')?.value.trim();
+  const emoji = document.getElementById('track-emoji')?.value.trim();
+
+  if (!title) {
+    showAdminToast('⚠️ يرجى إدخال عنوان الزفة', 'error');
+    return;
+  }
+
+  if (!youtube) {
+    showAdminToast('⚠️ يرجى إدخال رابط البث الصوتي أو معرّف يوتيوب', 'error');
+    return;
+  }
+
+  try {
+    const saved = TracksStore.saveTrack({
+      id: id || undefined,
+      title,
+      category,
+      price,
+      artist,
+      duration,
+      youtubeId: youtube,
+      fallbackYoutubeId: fallback,
+      tags,
+      coverEmoji: emoji || undefined,
     });
 
-    zone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      zone.style.borderColor = 'var(--gold)';
-      zone.style.background = 'rgba(212,175,55,0.08)';
-    });
+    showAdminToast(`✨ تم ${id ? 'تحديث' : 'إضافة'} زفة "${saved.title}" بنجاح ونشرها للموقع!`, 'success');
+    resetTrackForm();
+    renderAdminLibrary(adminActiveLibFilter);
+  } catch (err) {
+    showAdminToast(`❌ خطأ: ${err.message}`, 'error');
+  }
+}
 
-    zone.addEventListener('dragleave', () => {
-      zone.style.borderColor = '';
-      zone.style.background = '';
-    });
+function editTrack(trackId) {
+  if (!window.TracksStore) return;
+  const track = TracksStore.getTrackById(trackId);
+  if (!track) return;
 
-    zone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        zone.querySelector('.upload-label').textContent = `✅ ${file.name}`;
-        zone.style.borderColor = '#4ade80';
-      }
-    });
-  });
+  document.getElementById('track-edit-id').value = track.id;
+  document.getElementById('track-title').value = track.title || '';
+  document.getElementById('track-category').value = track.category || 'saudi';
+  document.getElementById('track-price').value = track.price || 249;
+  document.getElementById('track-artist').value = track.artist || '';
+  document.getElementById('track-duration').value = track.duration || '4:15';
+  document.getElementById('track-youtube').value = track.audioUrl || track.youtubeId || '';
+  document.getElementById('track-fallback').value = track.fallbackYoutubeId || '';
+  document.getElementById('track-tags').value = Array.isArray(track.tags) ? track.tags.join(', ') : (track.tags || '');
+  document.getElementById('track-emoji').value = track.coverEmoji || '';
+
+  const formTitle = document.getElementById('form-card-title');
+  if (formTitle) formTitle.textContent = `✏️ تعديل: ${track.title}`;
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if (cancelBtn) cancelBtn.style.display = 'inline-block';
+  const submitBtn = document.getElementById('add-track-submit');
+  if (submitBtn) submitBtn.textContent = '💾 حفظ التعديلات ونشرها';
+
+  // Scroll to form smoothly
+  document.getElementById('add-track-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  showAdminToast(`📝 تم تحميل بيانات الزفة "${track.title}" في النموذج`, 'info');
+}
+
+function resetTrackForm() {
+  document.getElementById('track-edit-id').value = '';
+  document.getElementById('add-track-form')?.reset();
+  document.getElementById('track-price').value = '249';
+  document.getElementById('track-duration').value = '4:15';
+
+  const formTitle = document.getElementById('form-card-title');
+  if (formTitle) formTitle.textContent = '➕ إضافة زفة أو أغنية جديدة';
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  const submitBtn = document.getElementById('add-track-submit');
+  if (submitBtn) submitBtn.textContent = '✨ حفظ الزفة ونشرها فوراً';
+}
+
+function deleteTrack(trackId) {
+  if (!window.TracksStore) return;
+  const track = TracksStore.getTrackById(trackId);
+  if (!track) return;
+
+  if (confirm(`هل أنت متأكد من حذف زفة "${track.title}" من المكتبة؟`)) {
+    if (currentPlayingTrackId === trackId && window.AudioEngine) {
+      AudioEngine.stop();
+      currentPlayingTrackId = null;
+    }
+    TracksStore.deleteTrack(trackId);
+    renderAdminLibrary(adminActiveLibFilter);
+    showAdminToast(`🗑️ تم حذف زفة "${track.title}" من المكتبة`, 'success');
+  }
+}
+
+function handleResetLibrary() {
+  if (confirm('هل تريد استعادة جميع المسارات الافتراضية الرسمية وحذف التعديلات المخصصة؟')) {
+    if (window.AudioEngine) AudioEngine.stop();
+    currentPlayingTrackId = null;
+    TracksStore.resetToDefaults();
+    renderAdminLibrary(adminActiveLibFilter);
+    showAdminToast('🔄 تم استعادة المكتبة الافتراضية بنجاح', 'success');
+  }
+}
+
+function handleImportJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      TracksStore.importJSON(e.target.result);
+      renderAdminLibrary(adminActiveLibFilter);
+      showAdminToast('📥 تم استيراد المكتبة بنجاح وتحديث المسارات!', 'success');
+    } catch (err) {
+      showAdminToast('❌ تعذر استيراد الملف: تأكد من صحة تنسيق JSON', 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -514,7 +737,6 @@ function startLiveClock() {
    ══════════════════════════════════════════════════════════ */
 
 function animateStats() {
-  // Animate revenue counter with rAF for smoothness
   const revenueEl = document.getElementById('stat-revenue');
   if (revenueEl) {
     const orders = adminState.orders;
@@ -525,7 +747,7 @@ function animateStats() {
     const tick = (now) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       const current = Math.round(eased * totalRevenue);
       revenueEl.textContent = current.toLocaleString('ar-SA') + ' ر.س';
       if (progress < 1) requestAnimationFrame(tick);
@@ -545,7 +767,7 @@ function showAdminToast(message, type = 'info') {
   const icons = { success: '✅', error: '❌', info: '💫' };
   const toast = document.createElement('div');
   toast.className = 'admin-toast';
-  toast.innerHTML = `${icons[type]} ${message}`;
+  toast.innerHTML = `${icons[type] || '💫'} ${message}`;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -562,7 +784,7 @@ setInterval(() => {
   loadOrders();
   renderOrdersTable();
   renderStats();
-}, 30000); // Refresh every 30 seconds
+}, 30000);
 
 /* Expose for HTML */
 window.updateOrderStatus = updateOrderStatus;
@@ -571,3 +793,12 @@ window.sendWhatsAppUpdate = sendWhatsAppUpdate;
 window.openInAIWorkstation = openInAIWorkstation;
 window.switchTab = switchTab;
 window.showAdminToast = showAdminToast;
+window.filterAdminLibrary = filterAdminLibrary;
+window.previewTrack = previewTrack;
+window.editTrack = editTrack;
+window.deleteTrack = deleteTrack;
+window.handleSaveTrackForm = handleSaveTrackForm;
+window.resetTrackForm = resetTrackForm;
+window.handleResetLibrary = handleResetLibrary;
+window.handleImportJSON = handleImportJSON;
+

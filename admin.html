@@ -339,86 +339,130 @@
 
     <!-- ════════════ LIBRARY TAB ════════════ -->
     <div class="tab-page" id="tab-library">
-      <div class="library-grid">
+      
+      <!-- Top Action Bar for Library -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="library-category-filters">
+          <button class="btn-sm active" data-lib-filter="كل" onclick="filterAdminLibrary('كل')" style="border-color:var(--gold);color:var(--gold);">الكل</button>
+          <button class="btn-sm" data-lib-filter="saudi" onclick="filterAdminLibrary('saudi')">🇸🇦 سعودية</button>
+          <button class="btn-sm" data-lib-filter="kuwait" onclick="filterAdminLibrary('kuwait')">🇰🇼 كويتية</button>
+          <button class="btn-sm" data-lib-filter="uae" onclick="filterAdminLibrary('uae')">🇦🇪 إماراتية</button>
+          <button class="btn-sm" data-lib-filter="classic" onclick="filterAdminLibrary('classic')">🎻 كلاسيك</button>
+          <button class="btn-sm" data-lib-filter="duff" onclick="filterAdminLibrary('duff')">🥁 دفوف</button>
+          <button class="btn-sm" data-lib-filter="poetry" onclick="filterAdminLibrary('poetry')">📜 قصائد</button>
+          <button class="btn-sm" data-lib-filter="bride" onclick="filterAdminLibrary('bride')">👰 عروس</button>
+          <button class="btn-sm" data-lib-filter="groom" onclick="filterAdminLibrary('groom')">🤵 عريس</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm" onclick="TracksStore.exportJSON();showAdminToast('📥 تم تصدير ملف المكتبة JSON','success')" title="تصدير المكتبة الحالية">💾 تصدير JSON</button>
+          <button class="btn-sm" onclick="document.getElementById('import-json-input').click()" title="استيراد مكتبة من ملف JSON">📂 استيراد JSON</button>
+          <input type="file" id="import-json-input" accept=".json" style="display:none;" onchange="handleImportJSON(event)" />
+          <button class="btn-sm" onclick="handleResetLibrary()" style="color:#ef4444;border-color:rgba(239,68,68,0.3);" title="استعادة المكتبة الافتراضية">🔄 استعادة الافتراضي</button>
+        </div>
+      </div>
 
-        <!-- Add Track Form -->
-        <div class="card">
+      <div class="library-grid" style="display:grid;grid-template-columns: 420px 1fr; gap:22px; align-items:start;">
+
+        <!-- Add / Edit Track Form Card -->
+        <div class="card" style="position:sticky;top:90px;">
           <div class="card-header">
-            <div class="card-title">➕ إضافة مسار جديد</div>
+            <div class="card-title" id="form-card-title">➕ إضافة زفة أو أغنية جديدة</div>
+            <button class="btn-sm" id="cancel-edit-btn" style="display:none;" onclick="resetTrackForm()">إلغاء التعديل</button>
           </div>
           <div style="padding:22px;">
-            <form id="add-track-form" novalidate>
+            <form id="add-track-form" novalidate onsubmit="handleSaveTrackForm(event)">
+              <input type="hidden" id="track-edit-id" value="" />
+
               <div class="form-group-admin">
-                <label class="label-admin" for="track-title">عنوان الزفة <span style="color:var(--gold)">*</span></label>
+                <label class="label-admin" for="track-title">عنوان الزفة / الأغنية <span style="color:var(--gold)">*</span></label>
                 <input type="text" id="track-title" class="input-admin" placeholder="مثال: زفة الملوك الخليجية" required />
               </div>
 
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="form-group-admin">
-                  <label class="label-admin" for="track-category">الفئة</label>
-                  <select id="track-category" class="select-admin">
-                    <option value="saudi">زفة سعودية</option>
-                    <option value="uae">إماراتية / كويتية</option>
-                    <option value="duff">دفوف بدون موسيقى</option>
-                    <option value="poetry">قصائد وشلات</option>
-                    <option value="bride">دخلة عروس</option>
-                    <option value="groom">موكب عريس</option>
+                  <label class="label-admin" for="track-category">المكتبة / الفئة <span style="color:var(--gold)">*</span></label>
+                  <select id="track-category" class="select-admin" required>
+                    <option value="saudi">🇸🇦 زفة سعودية</option>
+                    <option value="kuwait">🇰🇼 زفة وطرب كويتي</option>
+                    <option value="uae">🇦🇪 إماراتية وخليجية</option>
+                    <option value="classic">🎻 كلاسيك وفخامة</option>
+                    <option value="duff">🥁 دفوف بدون موسيقى</option>
+                    <option value="poetry">📜 قصائد وشلات</option>
+                    <option value="bride">👰 دخلة عروس</option>
+                    <option value="groom">🤵 موكب عريس</option>
                   </select>
                 </div>
                 <div class="form-group-admin">
                   <label class="label-admin" for="track-price">السعر (ر.س)</label>
-                  <input type="number" id="track-price" class="input-admin" placeholder="249" min="0" />
+                  <input type="number" id="track-price" class="input-admin" placeholder="249" min="0" value="249" />
                 </div>
               </div>
 
-              <div class="form-group-admin">
-                <label class="label-admin" for="track-artist">الأسلوب / الفنان</label>
-                <input type="text" id="track-artist" class="input-admin" placeholder="أسلوب خليجي أصيل" />
-              </div>
-
-              <!-- Upload Zones -->
-              <div class="form-group-admin">
-                <label class="label-admin">🎤 رفع الملف الصوتي الرئيسي (Vocal)</label>
-                <div class="upload-zone" id="upload-vocal" aria-label="رفع الملف الصوتي">
-                  <span class="upload-icon">🎙️</span>
-                  <div class="upload-label">اسحب الملف أو اضغط للرفع</div>
-                  <div class="upload-sub">MP3 / WAV / FLAC — حتى 100MB</div>
+              <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+                <div class="form-group-admin">
+                  <label class="label-admin" for="track-artist">الأسلوب / الفنان الأصلي</label>
+                  <input type="text" id="track-artist" class="input-admin" placeholder="مثال: أسلوب ملكي سامري أصيل" />
+                </div>
+                <div class="form-group-admin">
+                  <label class="label-admin" for="track-duration">المدة</label>
+                  <input type="text" id="track-duration" class="input-admin" placeholder="4:15" value="4:15" />
                 </div>
               </div>
 
+              <!-- Audio Stream Links -->
               <div class="form-group-admin">
-                <label class="label-admin">🥁 رفع المصاحبة / الدفوف (Backing)</label>
-                <div class="upload-zone" id="upload-backing" aria-label="رفع ملف الدفوف">
-                  <span class="upload-icon">🥁</span>
-                  <div class="upload-label">اسحب ملف الإيقاع أو اضغط للرفع</div>
-                  <div class="upload-sub">MP3 / WAV — حتى 100MB</div>
+                <label class="label-admin" for="track-youtube">
+                  🔗 رابط البث الصوتي أو يوتيوب <span style="color:var(--gold)">*</span>
+                </label>
+                <input type="text" id="track-youtube" class="input-admin" placeholder="معرّف يوتيوب (مثل Rh9M8EBs6bw) أو رابط بث مباشر MP3" required />
+                <small style="display:block;margin-top:4px;font-size:0.72rem;color:var(--text-dim);">
+                  يمكنك وضع رابط يوتيوب كامل، معرّف فيديو، أو رابط ملف صوتي مباشر (MP3/AAC).
+                </small>
+              </div>
+
+              <div class="form-group-admin">
+                <label class="label-admin" for="track-fallback">
+                  🔄 رابط بديل احتياطي (Fallback Link)
+                </label>
+                <input type="text" id="track-fallback" class="input-admin" placeholder="رابط يوتيوب أو صوت بديل عند انقطاع الأول" />
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group-admin">
+                  <label class="label-admin" for="track-tags">الوسوم (مفصولة بفاصلة)</label>
+                  <input type="text" id="track-tags" class="input-admin" placeholder="دفوف, سامري, ملكية" />
+                </div>
+                <div class="form-group-admin">
+                  <label class="label-admin" for="track-emoji">رمز التعبير (Emoji)</label>
+                  <input type="text" id="track-emoji" class="input-admin" placeholder="👑" maxlength="4" />
                 </div>
               </div>
 
-              <button type="submit" class="btn-sm primary" style="width:100%;padding:13px;font-size:0.9rem;justify-content:center;" id="add-track-submit">
-                ✅ إضافة المسار للمكتبة
+              <button type="submit" class="btn-sm primary" style="width:100%;padding:14px;font-size:0.95rem;justify-content:center;margin-top:8px;" id="add-track-submit">
+                ✨ حفظ الزفة ونشرها فوراً
               </button>
             </form>
           </div>
         </div>
 
-        <!-- Existing Tracks Preview -->
+        <!-- Existing Tracks Manager List -->
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">🎵 المسارات في المكتبة</div>
-            <span style="font-size:0.78rem;color:var(--text-dim);">6 مسارات</span>
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="card-title">🎵 جميع الزفات في المكتبات الفنية</div>
+              <span class="nav-badge" id="library-count-badge" style="position:static;font-size:0.75rem;">0 مسار</span>
+            </div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">
+              اضغط على زر التشغيل ▶ لتجربة الصوت الحقيقي في الكواليس
+            </div>
           </div>
-          <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
-            ${['زفة الملوك الخليجية', 'دخلة العروس الذهبية', 'قصيدة الاستقبال الكويتية', 'زفة الدفوف', 'شلة الفرحة', 'موكب العريس الملكي'].map((title, i) => `
-              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
-                <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(201,121,106,0.1));display:flex;align-items:center;justify-content:center;font-size:1rem;">🎵</div>
-                <div style="flex:1;font-size:0.84rem;color:var(--text-primary);font-weight:600;">${title}</div>
-                <div style="font-size:0.7rem;color:var(--text-dim);">${[249,199,299,149,279,349][i]} ر.س</div>
-                <button class="action-btn copy" onclick="showAdminToast('✏️ فتح تعديل: ${title}','info')" title="تعديل">✏️</button>
-              </div>
-            `).join('')}
+          <div style="padding:16px;">
+            <div id="admin-tracks-list" style="display:flex;flex-direction:column;gap:10px;">
+              <!-- Dynamic render by renderAdminLibrary() -->
+            </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -768,6 +812,7 @@
 </main>
 
 <script src="https://www.youtube.com/iframe_api"></script>
+<script src="js/tracks-store.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/admin.js"></script>
 <script>

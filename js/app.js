@@ -459,6 +459,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initCounters();
   initScrollReveal();
   initHeroStats();
+
+  // Real-time synchronization when admin adds/updates tracks
+  window.addEventListener('zg_tracks_updated', () => {
+    initFilterTabs();
+    renderTracks();
+  });
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -536,37 +542,55 @@ function initParticles() {
 }
 
 /* ══════════════════════════════════════════════════════════
+   DYNAMIC TRACKS ACCESSOR & FILTERING
+   ══════════════════════════════════════════════════════════ */
+function getActiveTracks() {
+  if (window.TracksStore && typeof TracksStore.getAllTracks === 'function') {
+    return TracksStore.getAllTracks();
+  }
+  return TRACKS_DATA;
+}
+
+function getActiveTrackById(id) {
+  if (window.TracksStore && typeof TracksStore.getTrackById === 'function') {
+    const found = TracksStore.getTrackById(id);
+    if (found) return found;
+  }
+  return TRACKS_DATA.find(t => t.id === id) || null;
+}
+
+/* ══════════════════════════════════════════════════════════
    FILTER TABS & TRACK RENDERING
    ══════════════════════════════════════════════════════════ */
 function initFilterTabs() {
   const tabs = document.querySelectorAll('.filter-tab');
+  const allTracks = getActiveTracks();
   
   tabs.forEach(tab => {
     const cat = tab.dataset.category;
-    let count = TRACKS_DATA.length;
+    let count = allTracks.length;
     if (cat !== 'كل') {
-      count = TRACKS_DATA.filter(t => 
+      count = allTracks.filter(t => 
         t.category === cat || 
-        t.region === cat || 
-        (cat === 'uae' && (t.region === 'uae' || t.region === 'kuwait'))
+        t.region === cat
       ).length;
     }
     
-    const existingBadge = tab.querySelector('.tab-badge');
-    if (!existingBadge) {
-      const badge = document.createElement('span');
+    let badge = tab.querySelector('.tab-badge');
+    if (!badge) {
+      badge = document.createElement('span');
       badge.className = 'tab-badge';
       badge.style.cssText = 'background:rgba(212,175,55,0.15);color:var(--gold);font-size:0.7rem;padding:2px 6px;border-radius:99px;margin-right:6px;font-weight:700;';
-      badge.textContent = count;
       tab.appendChild(badge);
     }
+    badge.textContent = count;
 
-    tab.addEventListener('click', () => {
+    tab.onclick = () => {
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       state.activeCategory = tab.dataset.category;
       renderTracks();
-    });
+    };
   });
 }
 
@@ -574,12 +598,12 @@ function renderTracks() {
   const grid = document.getElementById('tracks-grid');
   if (!grid) return;
 
+  const allTracks = getActiveTracks();
   const filtered = state.activeCategory === 'كل'
-    ? TRACKS_DATA
-    : TRACKS_DATA.filter(t => 
+    ? allTracks
+    : allTracks.filter(t => 
         t.category === state.activeCategory || 
-        t.region === state.activeCategory || 
-        (state.activeCategory === 'uae' && (t.region === 'uae' || t.region === 'kuwait'))
+        t.region === state.activeCategory
       );
 
   grid.innerHTML = filtered.map(track => {
@@ -587,13 +611,13 @@ function renderTracks() {
     return `
     <div class="track-card" data-id="${track.id}" role="article" aria-label="${track.title}">
       <div class="track-cover">
-        <div style="width:100%;height:100%;background:${track.coverGradient};position:relative;display:flex;align-items:center;justify-content:center;">
-          <div style="font-size:4rem;opacity:0.35;filter:blur(1px)">${track.coverEmoji}</div>
-          <div style="position:absolute;inset:0;background:linear-gradient(135deg,${track.coverGradient.replace('linear-gradient(135deg, ','').replace(')','')});opacity:0.7;"></div>
+        <div style="width:100%;height:100%;background:${track.coverGradient || 'linear-gradient(135deg, #1a0a00, #3d1a00)'};position:relative;display:flex;align-items:center;justify-content:center;">
+          <div style="font-size:4rem;opacity:0.35;filter:blur(1px)">${track.coverEmoji || '🎵'}</div>
+          <div style="position:absolute;inset:0;background:${track.coverGradient || 'linear-gradient(135deg, #1a0a00, #3d1a00)'};opacity:0.7;"></div>
           <div style="position:absolute;bottom:0;right:0;left:0;height:60px;background:linear-gradient(to bottom,transparent,rgba(10,15,29,0.9));"></div>
         </div>
-        <div class="track-region-badge">${track.regionLabel}</div>
-        <div class="track-duration-badge">⏱ ${track.duration}</div>
+        <div class="track-region-badge">${track.regionLabel || 'خليجية'}</div>
+        <div class="track-duration-badge">⏱ ${track.duration || '4:15'}</div>
         <div class="track-play-overlay">
           <div class="track-play-big" onclick="playTrackFromCard('${track.id}', event)">▶</div>
         </div>
@@ -602,7 +626,7 @@ function renderTracks() {
         <div class="track-title">${track.title}</div>
         <div class="track-artist">${track.artist}</div>
         <div class="track-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-          ${track.tags.map(t => `<span style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);color:rgba(212,175,55,0.7);font-size:0.68rem;padding:2px 8px;border-radius:99px;">${t}</span>`).join('')}
+          ${(track.tags || ['زفة', 'خليجية']).map(t => `<span style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);color:rgba(212,175,55,0.7);font-size:0.68rem;padding:2px 8px;border-radius:99px;">${t}</span>`).join('')}
         </div>
         <div class="track-mini-player">
           <button class="track-mini-btn ${isThisPlaying ? 'playing' : ''}" id="mini-btn-${track.id}" onclick="toggleMiniPlay('${track.id}', event)" aria-label="تشغيل المعاينة السحابية">
@@ -663,7 +687,7 @@ function resetMiniControls() {
 
 function toggleMiniPlay(trackId, event) {
   event && event.stopPropagation();
-  const trackObj = TRACKS_DATA.find(t => t.id === trackId);
+  const trackObj = getActiveTrackById(trackId);
   if (!trackObj) return;
 
   const waveform = document.getElementById(`waveform-${trackId}`);
@@ -740,7 +764,7 @@ function toggleMiniPlay(trackId, event) {
 
 function playTrackFromCard(trackId, event) {
   event && event.stopPropagation();
-  const track = TRACKS_DATA.find(t => t.id === trackId);
+  const track = getActiveTrackById(trackId);
   if (track) {
     loadStickyPlayer(track);
   }
@@ -755,24 +779,26 @@ function initComparisonAudio() {
   const waveBefore = document.getElementById('wave-before');
   const waveAfter = document.getElementById('wave-after');
 
+  // Realistic Gulf wedding sound demos in background
+  const ytBefore = 'Rh9M8EBs6bw'; // زفة أصلية بدون أسماء
+  const ytAfter  = 'AX8QOuy7YJs'; // زفة باسم العروسين بصوت الفنان
+
   let beforeInterval = null;
   let afterInterval = null;
 
-  const ytBefore = 'sK2WlF32Sxo';
-  const ytAfter = '7uV8YV7N1cM';
-
-  function toggleWave(wave, interval, isPlaying) {
-    if (!wave) return null;
-    if (isPlaying) {
-      wave.classList.add('active');
+  function toggleWave(container, interval, isPlay) {
+    if (!container) return null;
+    clearInterval(interval);
+    if (isPlay) {
       return setInterval(() => {
-        wave.querySelectorAll('.bar').forEach(b => {
-          b.style.height = `${Math.random() * 80 + 10}%`;
+        container.querySelectorAll('span').forEach(bar => {
+          bar.style.height = `${Math.random() * 75 + 10}%`;
         });
       }, 150);
     } else {
-      wave.classList.remove('active');
-      clearInterval(interval);
+      container.querySelectorAll('span').forEach(bar => {
+        bar.style.height = '15%';
+      });
       return null;
     }
   }
@@ -848,6 +874,10 @@ function initStickyPlayer() {
       if (duration && duration > 0) {
         state.duration = duration;
       }
+      const activeTrack = getActiveTrackById(currentMiniPlay);
+      if (activeTrack && state.currentTime >= (state.duration - 1)) {
+        resetMiniControls();
+      }
       updateProgress();
     }
   });
@@ -856,7 +886,7 @@ function initStickyPlayer() {
   AudioEngine.onStateChange((isPlaying) => {
     state.isPlaying = isPlaying;
     if (!isPlaying && currentMiniPlay) {
-      const activeTrack = TRACKS_DATA.find(t => t.id === currentMiniPlay);
+      const activeTrack = getActiveTrackById(currentMiniPlay);
       if (activeTrack && state.currentTime >= (state.duration - 1)) {
         resetMiniControls();
       }
@@ -867,8 +897,9 @@ function initStickyPlayer() {
   // Play / Pause button
   if (playBtn) {
     playBtn.addEventListener('click', () => {
-      if (!state.currentTrack && TRACKS_DATA.length > 0) {
-        loadStickyPlayer(TRACKS_DATA[0]);
+      const allTracks = getActiveTracks();
+      if (!state.currentTrack && allTracks.length > 0) {
+        loadStickyPlayer(allTracks[0]);
         return;
       }
 
@@ -939,15 +970,16 @@ function initStickyPlayer() {
 }
 
 function navigateTrack(direction) {
+  const allTracks = getActiveTracks();
   if (!state.currentTrack) {
-    if (TRACKS_DATA.length > 0) loadStickyPlayer(TRACKS_DATA[0]);
+    if (allTracks.length > 0) loadStickyPlayer(allTracks[0]);
     return;
   }
-  const currentIndex = TRACKS_DATA.findIndex(t => t.id === state.currentTrack.id);
+  const currentIndex = allTracks.findIndex(t => t.id === state.currentTrack.id);
   let nextIndex = currentIndex + direction;
-  if (nextIndex >= TRACKS_DATA.length) nextIndex = 0;
-  if (nextIndex < 0) nextIndex = TRACKS_DATA.length - 1;
-  loadStickyPlayer(TRACKS_DATA[nextIndex]);
+  if (nextIndex >= allTracks.length) nextIndex = 0;
+  if (nextIndex < 0) nextIndex = allTracks.length - 1;
+  loadStickyPlayer(allTracks[nextIndex]);
 }
 
 function loadStickyPlayer(track) {
@@ -1100,7 +1132,7 @@ function drawAnimatedWaveform() {
    BOOKING MODAL
    ══════════════════════════════════════════════════════════ */
 function openBookingModal(trackId) {
-  const track = TRACKS_DATA.find(t => t.id === trackId);
+  const track = getActiveTrackById(trackId);
   if (!track) return;
 
   state.bookingTrack = track;
