@@ -302,6 +302,8 @@ const AudioEngine = (() => {
     if (onError) onErrorCallback = onError;
     if (onEnded) onEndedCallback = onEnded;
 
+    initAudioContext();
+
     let track = null;
     if (typeof trackOrId === 'object' && trackOrId !== null) {
       track = trackOrId;
@@ -353,6 +355,7 @@ const AudioEngine = (() => {
   }
 
   function resume() {
+    initAudioContext();
     isPlaying = true;
     if (isUsingNativeAudio && nativeAudio) {
       nativeAudio.play().catch(() => playViaSynthesizer(currentTrackData));
