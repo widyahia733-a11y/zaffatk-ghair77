@@ -707,9 +707,9 @@ function toggleMiniPlay(trackId, event) {
   if (player) player.classList.add('visible');
   updatePlayerUI();
 
-  // Play through headless background YouTube Audio Controller
+  // Play through headless background YouTube Audio Controller or direct stream
   AudioEngine.play(
-    trackObj.youtubeId,
+    trackObj,
     (failedId, err) => {
       resetMiniControls();
       state.isPlaying = false;
@@ -874,7 +874,7 @@ function initStickyPlayer() {
 
       state.isPlaying = !state.isPlaying;
       if (state.isPlaying) {
-        AudioEngine.play(state.currentTrack.youtubeId, null, null, state.currentTrack);
+        AudioEngine.play(state.currentTrack, null, null, state.currentTrack);
       } else {
         AudioEngine.pause();
         resetMiniControls();
@@ -968,9 +968,9 @@ function loadStickyPlayer(track) {
   if (player) player.classList.add('visible');
   updatePlayerUI();
 
-  // Play through background YouTube controller
+  // Play through background controller or direct stream
   AudioEngine.play(
-    track.youtubeId,
+    track,
     (failedId, err) => {
       state.isPlaying = false;
       updatePlayerUI();

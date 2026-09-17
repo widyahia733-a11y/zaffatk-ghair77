@@ -12,7 +12,11 @@
     Permissions-Policy = "autoplay=*, encrypted-media=*"
 
 [[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Role = ["*"]}

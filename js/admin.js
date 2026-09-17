@@ -404,8 +404,24 @@ function startResultWaveform() {
 }
 
 function previewMergedAudio() {
-  showAdminToast('🎵 جاري تشغيل المعاينة المدمجة...', 'info');
-  startResultWaveform();
+  if (window.AudioEngine) {
+    if (window.AudioEngine.getState()) {
+      window.AudioEngine.pause();
+      showAdminToast('⏸ تم إيقاف المعاينة مؤقتاً', 'info');
+      return;
+    }
+    showAdminToast('🎵 جاري تشغيل المعاينة المدمجة في الكواليس...', 'info');
+    startResultWaveform();
+    window.AudioEngine.play(
+      'AX8QOuy7YJs',
+      () => showAdminToast('تعذر تشغيل المعاينة سحابياً', 'error'),
+      () => showAdminToast('انتهى تشغيل المعاينة', 'info'),
+      { title: 'معاينة الزفة المدمجة بالذكاء الاصطناعي', artist: 'استوديو زفتك غير الهندسي' }
+    );
+  } else {
+    showAdminToast('🎵 جاري تشغيل المعاينة المدمجة...', 'info');
+    startResultWaveform();
+  }
 }
 
 function exportAndDeliver() {
