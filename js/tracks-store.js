@@ -526,15 +526,16 @@ const TracksStore = (() => {
     const isEdit = !!trackInput.id;
     const trackId = isEdit ? trackInput.id : `tr-custom-${Date.now()}`;
 
-    // معالجة الروابط
+    // معالجة الروابط والملفات الصوتية
     let ytId = cleanYoutubeId(trackInput.youtubeId || '');
     let audioUrl = (trackInput.audioUrl || '').trim();
     let fallbackYt = cleanYoutubeId(trackInput.fallbackYoutubeId || '') || 'Rh9M8EBs6bw';
 
-    // إذا تم تمرير رابط صوتي في حقل اليوتيوب أو العكس
-    if (!ytId && /^https?:\/\//i.test(trackInput.youtubeId || '')) {
-      if (/\.(mp3|aac|m4a|wav|ogg)(\?.*)?$/i.test(trackInput.youtubeId)) {
-        audioUrl = trackInput.youtubeId.trim();
+    // إذا تم تمرير رابط صوتي أو ملف DataURL في حقل يوتيوب
+    if (!ytId && (trackInput.youtubeId || '')) {
+      const ytRaw = trackInput.youtubeId.trim();
+      if (/^data:audio\//i.test(ytRaw) || /^blob:/i.test(ytRaw) || /\.(mp3|aac|m4a|wav|ogg)(\?.*)?$/i.test(ytRaw) || /^https?:\/\//i.test(ytRaw)) {
+        audioUrl = ytRaw;
       }
     }
 

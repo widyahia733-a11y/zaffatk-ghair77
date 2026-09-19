@@ -183,11 +183,8 @@
 
       <!-- Actions -->
       <div class="nav-actions">
-        <button class="nav-btn-contact" onclick="showToast('تواصل معنا عبر واتساب: +966 5X XXX XXXX', 'info')" aria-label="تواصل معنا">
+        <a href="https://wa.me/966500000000?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%20%D8%B2%D9%81%D8%AA%D9%83%20%D8%BA%D9%8A%D8%B1" target="_blank" rel="noopener" class="nav-btn-contact" aria-label="تواصل معنا عبر واتساب" style="text-decoration:none;">
           💬 تواصل معنا
-        </button>
-        <a href="admin.html" class="nav-btn-login" aria-label="دخول المدير">
-          🔐 لوحة المدير
         </a>
         <button class="hamburger" id="hamburger" aria-label="قائمة التنقل" aria-expanded="false">
           <span></span><span></span><span></span>
@@ -703,9 +700,12 @@
         </div>
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" style="display:flex;flex-direction:column;gap:10px;">
         <button class="btn-submit" id="submit-order" aria-label="تأكيد وإتمام الدفع">
           🔐 تأكيد وإتمام الدفع
+        </button>
+        <button type="button" class="btn-ghost" id="modal-wa-sample-btn" style="width:100%;justify-content:center;color:#4ade80;border-color:rgba(74,222,128,0.3);padding:12px;font-size:0.9rem;" onclick="handleModalWhatsAppConsultation()">
+          💬 استشرنا أو اطلب عينة مجانية على الواتساب
         </button>
       </div>
     </div>
@@ -778,6 +778,22 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════
+     SOCIAL PROOF LIVE NOTIFICATION WIDGET (إشعارات حية)
+     ══════════════════════════════════════════════════════ -->
+<div class="social-proof-toast" id="social-proof-toast" role="status" aria-live="polite">
+  <div class="sp-icon" aria-hidden="true">👑</div>
+  <div class="sp-content">
+    <div class="sp-header">
+      <span class="sp-live-dot"></span>
+      <span class="sp-tag">حجز مباشر الآن</span>
+      <span class="sp-time" id="sp-time">قبل دقيقة</span>
+    </div>
+    <div class="sp-title" id="sp-title">تم حجز زفة الملوك للعروسين نورة ومحمد ✨</div>
+  </div>
+  <button class="sp-close" onclick="dismissSocialProof()" aria-label="إغلاق الإشعار">✕</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
      MOBILE BOTTOM APP NAVIGATION (للهواتف)
      ══════════════════════════════════════════════════════ -->
 <nav class="mobile-bottom-nav" aria-label="شريط التنقل السفلي">
@@ -797,9 +813,9 @@
     <span class="mn-icon">💎</span>
     <span>الباقات</span>
   </a>
-  <a href="admin.html" class="mobile-nav-item">
-    <span class="mn-icon">🔐</span>
-    <span>المدير</span>
+  <a href="#tracking" class="mobile-nav-item">
+    <span class="mn-icon">📦</span>
+    <span>تتبع الطلب</span>
   </a>
 </nav>
 

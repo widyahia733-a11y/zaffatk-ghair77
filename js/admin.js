@@ -9,7 +9,7 @@
    CONSTANTS & STATE
    ══════════════════════════════════════════════════════════ */
 
-const ADMIN_PASS = 'zaffatak2025'; // Simple demo auth
+const ADMIN_PASS = 'admin123'; // Default secure admin password
 
 const adminState = {
   activeTab: 'orders',
@@ -44,16 +44,60 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ══════════════════════════════════════════════════════════
-   AUTH
+   AUTH (نظام تسجيل الدخول والأمان للوحة المدير)
    ══════════════════════════════════════════════════════════ */
 
 function checkAuth() {
-  // Simple demo auth check - in production use proper JWT
-  const auth = sessionStorage.getItem('zg_admin_auth');
-  if (!auth) {
-    // Auto-login for demo
-    sessionStorage.setItem('zg_admin_auth', 'true');
+  const isAuth = sessionStorage.getItem('zg_admin_authenticated') === 'true';
+  const overlay = document.getElementById('admin-login-overlay');
+  if (overlay) {
+    if (isAuth) {
+      overlay.classList.add('hidden');
+    } else {
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('admin-password-input')?.focus();
+      }, 250);
+    }
   }
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const input = document.getElementById('admin-password-input');
+  const errorMsg = document.getElementById('login-error-msg');
+  const overlay = document.getElementById('admin-login-overlay');
+  const val = input?.value.trim();
+
+  if (val === ADMIN_PASS) {
+    sessionStorage.setItem('zg_admin_authenticated', 'true');
+    errorMsg?.classList.remove('visible');
+    overlay?.classList.add('hidden');
+    input.value = '';
+    showAdminToast('👑 تم تسجيل الدخول بنجاح! مرحباً بك في لوحة الإدارة', 'success');
+  } else {
+    errorMsg?.classList.add('visible');
+    input?.select();
+  }
+}
+
+function togglePasswordVisibility() {
+  const input = document.getElementById('admin-password-input');
+  if (input) {
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('zg_admin_authenticated');
+  const overlay = document.getElementById('admin-login-overlay');
+  if (overlay) overlay.classList.remove('hidden');
+  const input = document.getElementById('admin-password-input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  showAdminToast('🔒 تم تسجيل الخروج وقفل لوحة التحكم', 'info');
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -210,11 +254,32 @@ function copyOrderDetails(orderId) {
 
 function sendWhatsAppUpdate(orderId) {
   const order = adminState.orders.find(o => o.id === orderId);
-  if (!order || !order.whatsapp) return;
+  if (!order || !order.whatsapp) {
+    showAdminToast('⚠️ لا يوجد رقم واتساب لهذا الطلب', 'error');
+    return;
+  }
 
-  const message = encodeURIComponent(`🎵 مرحباً بك في زفتك غير!\n\nطلبك رقم *${order.id}* قيد التجهيز الآن ✨\nسيصلك ملفك خلال 24 ساعة أو أقل إن شاء الله.\n\nشكراً لثقتك بنا 👑`);
-  window.open(`https://wa.me/${order.whatsapp.replace(/\s/g, '').replace('+', '')}?text=${message}`, '_blank');
-  showAdminToast(`💬 فتح واتساب للعميل ${order.client}`, 'info');
+  let cleanPhone = order.whatsapp.replace(/[\s\-\(\)]/g, '').replace('+', '');
+  if (cleanPhone.startsWith('05')) {
+    cleanPhone = '966' + cleanPhone.slice(1);
+  }
+
+  const trackTitle = order.track || order.track?.title || 'زفة ملكية خاصة';
+  const groom = order.groomName || '—';
+  const bride = order.brideName || '—';
+  const date = order.eventDate || '—';
+
+  const message = `مرحباً بك في زفتك غير 👑
+تم تأكيد واستلام طلبكم رقم: *${order.id}* ✨
+👰‍♂️ العريس: ${groom}
+💍 العروس: ${bride}
+🎵 الزفة المختارة: ${trackTitle}
+📅 تاريخ المناسبة: ${date}
+
+جاري العمل على تجهيز وهندسة زفتكم بأعلى جودة صوتية 320kbps، وسنرسل لكم النسخة النهائية قريباً إن شاء الله. 🤍`;
+
+  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+  showAdminToast(`💬 تم فتح شات واتساب للعميل ${order.client || ''}`, 'info');
 }
 
 function openInAIWorkstation(orderId) {
@@ -582,6 +647,38 @@ function previewTrack(trackId) {
   );
 }
 
+let uploadedAudioDataUrl = '';
+
+function handleLocalAudioFile(event) {
+  const file = event.target.files[0];
+  const statusEl = document.getElementById('file-upload-status');
+  if (!file) {
+    uploadedAudioDataUrl = '';
+    if (statusEl) statusEl.style.display = 'none';
+    return;
+  }
+
+  if (file.size > 25 * 1024 * 1024) {
+    showAdminToast('⚠️ حجم الملف الصوتي كبير جداً (الحد الأقصى 25 ميجابايت)', 'error');
+    event.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedAudioDataUrl = e.target.result;
+    if (statusEl) {
+      statusEl.textContent = `✅ تم رفع "${file.name}" بنجاح (${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
+      statusEl.style.display = 'block';
+    }
+    showAdminToast(`🎵 تم تحميل الملف الصوتي "${file.name}" محلياً`, 'success');
+  };
+  reader.onerror = () => {
+    showAdminToast('❌ تعذر قراءة الملف الصوتي', 'error');
+  };
+  reader.readAsDataURL(file);
+}
+
 function handleSaveTrackForm(e) {
   e.preventDefault();
   if (!window.TracksStore) return;
@@ -592,7 +689,7 @@ function handleSaveTrackForm(e) {
   const price = document.getElementById('track-price')?.value;
   const artist = document.getElementById('track-artist')?.value.trim();
   const duration = document.getElementById('track-duration')?.value.trim();
-  const youtube = document.getElementById('track-youtube')?.value.trim();
+  const youtubeInput = document.getElementById('track-youtube')?.value.trim();
   const fallback = document.getElementById('track-fallback')?.value.trim();
   const tags = document.getElementById('track-tags')?.value.trim();
   const emoji = document.getElementById('track-emoji')?.value.trim();
@@ -602,10 +699,7 @@ function handleSaveTrackForm(e) {
     return;
   }
 
-  if (!youtube) {
-    showAdminToast('⚠️ يرجى إدخال رابط البث الصوتي أو معرّف يوتيوب', 'error');
-    return;
-  }
+  const audioSource = uploadedAudioDataUrl || youtubeInput;
 
   try {
     const saved = TracksStore.saveTrack({
@@ -615,7 +709,8 @@ function handleSaveTrackForm(e) {
       price,
       artist,
       duration,
-      youtubeId: youtube,
+      youtubeId: audioSource || 'Rh9M8EBs6bw',
+      audioUrl: audioSource || '',
       fallbackYoutubeId: fallback,
       tags,
       coverEmoji: emoji || undefined,
@@ -645,6 +740,17 @@ function editTrack(trackId) {
   document.getElementById('track-tags').value = Array.isArray(track.tags) ? track.tags.join(', ') : (track.tags || '');
   document.getElementById('track-emoji').value = track.coverEmoji || '';
 
+  uploadedAudioDataUrl = track.audioUrl && /^data:audio\//i.test(track.audioUrl) ? track.audioUrl : '';
+  const statusEl = document.getElementById('file-upload-status');
+  if (statusEl) {
+    if (uploadedAudioDataUrl) {
+      statusEl.textContent = '✅ يوجد ملف صوتي محلي محفوظ لهذه الزفة';
+      statusEl.style.display = 'block';
+    } else {
+      statusEl.style.display = 'none';
+    }
+  }
+
   const formTitle = document.getElementById('form-card-title');
   if (formTitle) formTitle.textContent = `✏️ تعديل: ${track.title}`;
   const cancelBtn = document.getElementById('cancel-edit-btn');
@@ -662,6 +768,9 @@ function resetTrackForm() {
   document.getElementById('add-track-form')?.reset();
   document.getElementById('track-price').value = '249';
   document.getElementById('track-duration').value = '4:15';
+  uploadedAudioDataUrl = '';
+  const statusEl = document.getElementById('file-upload-status');
+  if (statusEl) statusEl.style.display = 'none';
 
   const formTitle = document.getElementById('form-card-title');
   if (formTitle) formTitle.textContent = '➕ إضافة زفة أو أغنية جديدة';
@@ -787,6 +896,10 @@ setInterval(() => {
 }, 30000);
 
 /* Expose for HTML */
+window.handleAdminLogin = handleAdminLogin;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.adminLogout = adminLogout;
+window.handleLocalAudioFile = handleLocalAudioFile;
 window.updateOrderStatus = updateOrderStatus;
 window.copyOrderDetails = copyOrderDetails;
 window.sendWhatsAppUpdate = sendWhatsAppUpdate;

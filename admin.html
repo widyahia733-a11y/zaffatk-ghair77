@@ -161,6 +161,23 @@
 </head>
 <body>
 
+<!-- Admin Login Overlay (حماية لوحة المدير بكلمة مرور) -->
+<div class="admin-login-overlay" id="admin-login-overlay">
+  <div class="admin-login-box">
+    <div class="login-crown" aria-hidden="true">👑</div>
+    <h2 class="login-title">لوحة إدارة زفتك غير</h2>
+    <p class="login-sub">المنطقة المحمية — يرجى إدخال كلمة المرور للمتابعة</p>
+    <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+      <div class="login-input-group">
+        <input type="password" id="admin-password-input" class="login-input" placeholder="كلمة المرور (الافتراضية: admin123)" required autocomplete="current-password" />
+        <button type="button" class="toggle-pass-btn" onclick="togglePasswordVisibility()" title="إظهار / إخفاء">👁️</button>
+      </div>
+      <button type="submit" class="login-btn" id="login-submit-btn">🔐 تسجيل الدخول</button>
+      <div class="login-error" id="login-error-msg">❌ كلمة المرور غير صحيحة، يرجى المحاولة مجدداً</div>
+    </form>
+  </div>
+</div>
+
 <!-- Admin Toast -->
 <div class="admin-toast-container" id="admin-toast-container" aria-live="polite"></div>
 
@@ -218,14 +235,17 @@
     </a>
   </nav>
 
-  <!-- User -->
+  <!-- User & Logout -->
   <div class="sidebar-footer">
-    <div class="sidebar-user" onclick="showAdminToast('👋 مرحباً بك يا مدير زفتك غير!', 'info')">
-      <div class="user-avatar" aria-hidden="true">م</div>
-      <div>
-        <div class="user-name">مدير النظام</div>
-        <div class="user-role">Super Admin</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <div class="sidebar-user" onclick="showAdminToast('👋 مرحباً بك يا مدير زفتك غير!', 'info')" style="flex:1;">
+        <div class="user-avatar" aria-hidden="true">م</div>
+        <div>
+          <div class="user-name">مدير النظام</div>
+          <div class="user-role">Super Admin</div>
+        </div>
       </div>
+      <button class="logout-btn" onclick="adminLogout()" title="تسجيل الخروج وقفل اللوحة">🔒</button>
     </div>
   </div>
 </aside>
@@ -258,6 +278,7 @@
         🔔
         <span class="notif-dot" aria-label="توجد إشعارات جديدة"></span>
       </button>
+      <button class="logout-btn" onclick="adminLogout()" title="تسجيل الخروج">🔒 خروج</button>
       <a href="index.html" class="topbar-btn" aria-label="العودة للموقع" title="الموقع الرئيسي" style="text-decoration:none;">🌐</a>
     </div>
   </div>
@@ -409,15 +430,23 @@
                 </div>
               </div>
 
-              <!-- Audio Stream Links -->
+              <!-- Audio Stream / Direct MP3 / Local File Upload -->
               <div class="form-group-admin">
                 <label class="label-admin" for="track-youtube">
-                  🔗 رابط البث الصوتي أو يوتيوب <span style="color:var(--gold)">*</span>
+                  🔗 رابط ملف MP3 مباشر أو معرّف يوتيوب
                 </label>
-                <input type="text" id="track-youtube" class="input-admin" placeholder="معرّف يوتيوب (مثل Rh9M8EBs6bw) أو رابط بث مباشر MP3" required />
+                <input type="text" id="track-youtube" class="input-admin" placeholder="رابط ملف MP3 مباشر (https://.../audio.mp3) أو معرّف يوتيوب" />
                 <small style="display:block;margin-top:4px;font-size:0.72rem;color:var(--text-dim);">
-                  يمكنك وضع رابط يوتيوب كامل، معرّف فيديو، أو رابط ملف صوتي مباشر (MP3/AAC).
+                  يمكنك وضع رابط ملف صوتي مباشر (MP3/AAC/WAV) أو رابط يوتيوب.
                 </small>
+              </div>
+
+              <div class="form-group-admin" style="background:rgba(212,175,55,0.04);border:1px dashed rgba(212,175,55,0.25);border-radius:10px;padding:12px;">
+                <label class="label-admin" for="track-file-input" style="color:var(--gold);">
+                  📁 أو رفع ملف صوتي محلي من جهازك (MP3/WAV/M4A)
+                </label>
+                <input type="file" id="track-file-input" class="input-admin" accept="audio/*" onchange="handleLocalAudioFile(event)" style="padding:6px;" />
+                <div id="file-upload-status" style="font-size:0.75rem;color:#4ade80;margin-top:4px;display:none;"></div>
               </div>
 
               <div class="form-group-admin">

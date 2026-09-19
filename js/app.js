@@ -459,6 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCounters();
   initScrollReveal();
   initHeroStats();
+  initSocialProofNotifications();
 
   // Real-time synchronization when admin adds/updates tracks
   window.addEventListener('zg_tracks_updated', () => {
@@ -638,10 +639,20 @@ function renderTracks() {
           <span class="track-watermark" style="font-size:0.6rem;color:rgba(212,175,55,0.4);">☁️ بث مباشر</span>
         </div>
         <div class="track-footer">
-          <div class="track-price">${track.price} <span>ر.س</span></div>
-          <button class="track-book-btn" id="book-${track.id}" onclick="openBookingModal('${track.id}')" aria-label="احجز هذه الزفة">
-            🎵 احجز الآن
-          </button>
+          <div class="track-price-row">
+            <div class="track-price">${track.price} <span>ر.س</span></div>
+            <button class="track-share-btn" onclick="shareTrack('${track.id}', event)" title="مشاركة الزفة عبر واتساب" aria-label="مشاركة الزفة">
+              🔗
+            </button>
+          </div>
+          <div class="track-actions-row">
+            <button class="track-book-btn" id="book-${track.id}" onclick="openBookingModal('${track.id}')" aria-label="احجز هذه الزفة">
+              🎵 احجز الآن
+            </button>
+            <button class="track-wa-btn" onclick="requestWhatsAppSample('${track.id}', event)" title="طلب استشارة أو عينة سريعة على الواتساب" aria-label="طلب عينة واتساب">
+              💬 عينة واتساب
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1433,6 +1444,144 @@ function showToast(message, type = 'info') {
 }
 
 /* ══════════════════════════════════════════════════════════
+   HIGH-CONVERSION SALES & ENGAGEMENT FEATURES
+   ══════════════════════════════════════════════════════════ */
+
+// 1. WhatsApp Instant Sample Request
+function requestWhatsAppSample(trackId, event) {
+  event && event.stopPropagation();
+  const track = getActiveTrackById(trackId);
+  if (!track) return;
+
+  const phone = '966500000000'; // Default business phone
+  const msg = encodeURIComponent(`مرحباً بك، أود الاستفسار وطلب عينة تجريبية لـ: "${track.title}" (${track.regionLabel || 'خليجية'}) ✨\nهل يمكن تزويدي بالتفاصيل؟ 👑`);
+  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+  showToast(`💬 تم فتح واتساب لطلب عينة: ${track.title}`, 'info');
+}
+
+// 2. Quick Track Sharing (WhatsApp & WebShare API)
+function shareTrack(trackId, event) {
+  event && event.stopPropagation();
+  const track = getActiveTrackById(trackId);
+  if (!track) return;
+
+  const currentUrl = window.location.href.split('#')[0] + '#catalog';
+  const shareTitle = `زفة ${track.title} — زفتك غير`;
+  const shareText = `استمعي لهذه الزفة الفاخرة "${track.title}" بصوت الفنان الأصلي وبأعلى دقة صوتية من منصة زفتك غير 👑✨:\n${currentUrl}`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: shareTitle,
+      text: shareText,
+      url: currentUrl,
+    }).catch(() => {
+      // Fallback to clipboard & WhatsApp
+      openWhatsAppShare(shareText);
+    });
+  } else {
+    openWhatsAppShare(shareText);
+  }
+}
+
+function openWhatsAppShare(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✨ تم نسخ الرابط وتجهيز المشاركة عبر واتساب', 'success');
+  }).catch(() => {});
+
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
+}
+
+// 3. Modal WhatsApp Consultation
+function handleModalWhatsAppConsultation() {
+  const track = state.bookingTrack;
+  const groomName = document.getElementById('groom-name')?.value.trim();
+  const brideName = document.getElementById('bride-name')?.value.trim();
+  const phone = '966500000000';
+
+  let customText = `مرحباً فريق زفتك غير، أود استشارة المهندس الصوتي بخصوص: "${track?.title || 'زفة خليجية'}" 👑`;
+  if (groomName || brideName) {
+    customText += `\n✨ لاسم العروسين: ${groomName || '—'} و ${brideName || '—'}`;
+  }
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(customText)}`, '_blank');
+  showToast('💬 جاري فتح واتساب للاستشارة المباشرة...', 'info');
+}
+
+// 4. Social Proof Notifications Engine
+const SOCIAL_PROOF_EVENTS = [
+  { title: 'تم حجز زفة الملوك للعروسين نورة ومحمد بالرياض ✨', time: 'قبل دقيقة', icon: '👑' },
+  { title: 'قام العريس فهد بحجز دخلة العروس الذهبية في دبي 💍', time: 'قبل 3 دقائق', icon: '💍' },
+  { title: 'تم تسليم زفة الدفوف التراثية للعروس سارة بجدة 🕊️', time: 'قبل 4 دقائق', icon: '🥁' },
+  { title: 'حجز جديد: شلة الفرحة الخليجية للعروسين هند وسلطان بالدمام 🌹', time: 'قبل دقيقتين', icon: '🌹' },
+  { title: 'تم حجز زفة نجد العذية للعروسين ريم وخالد بالكويت 🇰🇼', time: 'قبل 5 دقائق', icon: '✨' },
+  { title: 'طلب خاص: أوتار المجد الكلاسيكية للعروسين دانة وسعود 🎻', time: 'قبل دقيقة', icon: '🎻' },
+  { title: 'استلمت العروس شهد زفتها المخصصة كاملة خلال 18 ساعة ⚡', time: 'قبل 6 دقائق', icon: '⚡' },
+];
+
+let socialProofIndex = 0;
+let socialProofTimer = null;
+let isSocialProofDismissed = false;
+
+function initSocialProofNotifications() {
+  const widget = document.getElementById('social-proof-toast');
+  if (!widget) return;
+
+  // Pause on hover
+  widget.addEventListener('mouseenter', () => {
+    if (socialProofTimer) clearTimeout(socialProofTimer);
+  });
+
+  widget.addEventListener('mouseleave', () => {
+    scheduleNextSocialProof(12000);
+  });
+
+  // Start initial notification after 6 seconds
+  setTimeout(() => {
+    showNextSocialProof();
+  }, 6000);
+}
+
+function showNextSocialProof() {
+  if (isSocialProofDismissed) return;
+  const widget = document.getElementById('social-proof-toast');
+  const titleEl = document.getElementById('sp-title');
+  const timeEl = document.getElementById('sp-time');
+  if (!widget || !titleEl) return;
+
+  const item = SOCIAL_PROOF_EVENTS[socialProofIndex % SOCIAL_PROOF_EVENTS.length];
+  socialProofIndex++;
+
+  titleEl.textContent = item.title;
+  if (timeEl) timeEl.textContent = item.time;
+
+  widget.classList.add('visible');
+
+  // Hide after 6.5 seconds
+  if (socialProofTimer) clearTimeout(socialProofTimer);
+  socialProofTimer = setTimeout(() => {
+    widget.classList.remove('visible');
+    // Next trigger after 22 seconds
+    scheduleNextSocialProof(22000);
+  }, 6500);
+}
+
+function scheduleNextSocialProof(delay = 25000) {
+  if (isSocialProofDismissed) return;
+  if (socialProofTimer) clearTimeout(socialProofTimer);
+  socialProofTimer = setTimeout(() => {
+    showNextSocialProof();
+  }, delay);
+}
+
+function dismissSocialProof() {
+  const widget = document.getElementById('social-proof-toast');
+  if (widget) widget.classList.remove('visible');
+  isSocialProofDismissed = true;
+  if (socialProofTimer) clearTimeout(socialProofTimer);
+}
+
+/* ══════════════════════════════════════════════════════════
    GLOBAL EXPORTS
    ══════════════════════════════════════════════════════════ */
 window.openBookingModal = openBookingModal;
@@ -1440,3 +1589,7 @@ window.closeBookingModal = closeBookingModal;
 window.toggleMiniPlay = toggleMiniPlay;
 window.playTrackFromCard = playTrackFromCard;
 window.showToast = showToast;
+window.requestWhatsAppSample = requestWhatsAppSample;
+window.shareTrack = shareTrack;
+window.handleModalWhatsAppConsultation = handleModalWhatsAppConsultation;
+window.dismissSocialProof = dismissSocialProof;

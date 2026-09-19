@@ -320,9 +320,11 @@ const AudioEngine = (() => {
     currentTime = 0;
     setupMediaSession(track);
 
-    // إذا كان للزفة رابط صوتي حقيقي مباشر
+    // إذا كان للزفة رابط صوتي حقيقي مباشر أو ملف مرفوع (Data URL / Blob / URL)
     const audioUrl = track.audioUrl || track.streamUrl;
-    if (audioUrl && /^https?:\/\//i.test(audioUrl)) {
+    if (audioUrl && (/^(https?:\/\/|data:audio\/|blob:|\/|\.\/)/i.test(audioUrl) || /\.(mp3|wav|ogg|aac|m4a)(\?.*)?$/i.test(audioUrl))) {
+      stopGulfMelodyLoop();
+      stopTimerTracker();
       isUsingNativeAudio = true;
       const audio = getNativeAudio();
       audio.src = audioUrl;
